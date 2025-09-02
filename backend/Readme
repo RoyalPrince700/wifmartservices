@@ -1,0 +1,192 @@
+Wifmart Backend
+Overview
+The Wifmart backend is a Node.js/Express.js application that powers the Wifmart platform, a marketplace for connecting service providers with clients. It supports user authentication via Google OAuth, user profile management, service listings, portfolio uploads, search functionality, and admin verification for CAC (Corporate Affairs Commission) and badge status. The backend uses MongoDB for data storage, Cloudinary for file uploads, and JWT for authentication.
+Features
+
+User Authentication: Google OAuth for secure login, with JWT-based session management.
+User Profiles: Users can set up and edit profiles (e.g., profile_image, skills, whatsapp, cac_certificate).
+Dashboard: Displays user profile completion, hired providers, clients, and verification status.
+Service Management: Providers can create and manage services, linked to clients via user_id and client_id.
+Admin Verification: Admins can manage user CAC and badge verifications.
+File Uploads: Supports image and PDF uploads to Cloudinary for profiles and verification documents.
+Search: (Assumed) Search functionality for services and providers.
+
+Project Structure
+├── backend/
+│   ├── config/
+│   │   ├── cloudinary.js             # Cloudinary configuration
+│   │   └── googleOAuth.js            # Passport Google OAuth configuration
+│   ├── controllers/
+│   │   ├── adminController.js        # Admin functions for user and verification management
+│   │   └── userController.js         # User profile and dashboard functions
+│   ├── middleware/
+│   │   └── authMiddleware.js         # JWT authentication and admin authorization
+│   ├── models/
+│   │   ├── Service.js                # Service model with user_id and client_id
+│   │   └── User.js                   # User model with profile and verification fields
+│   ├── routes/
+│   │   ├── admin.js                  # Admin routes for user and verification management
+│   │   ├── authRoutes.js             # Google OAuth routes
+│   │   ├── portfolioRoutes.js        # Portfolio routes (assumed)
+│   │   ├── searchRoutes.js           # Search routes (assumed)
+│   │   └── userRoutes.js             # User profile and dashboard routes
+│   ├── utils/
+│   │   ├── cloudinaryUpload.js       # Cloudinary upload utility
+│   │   └── profileUtils.js           # Profile completion calculation utility
+│   ├── .env                          # Environment variables
+│   ├── .gitignore                    # Git ignore for node_modules, .env
+│   ├── package.json                  # Dependencies and scripts
+│   ├── server.js                     # Main Express server
+│   └── README.md                     # This file
+
+
+
+
+
+backend/
+├── models/
+│   ├── User.js
+│   ├── Service.js
+│   └── Subscription.js           ✅ NEW
+├── routes/
+│   ├── authRoutes.js
+│   ├── userRoutes.js
+│   ├── subscriptionRoutes.js     ✅ NEW
+│   ├── webhookRoutes.js          ✅ NEW (optional)
+│   └── ... (others)
+├── controllers/
+│   ├── userController.js
+│   ├── subscriptionController.js ✅ NEW
+│   └── adminController.js
+├── config/
+│   ├── cloudinary.js
+│   └── googleOAuth.js
+├── .env
+└── server.js                     ✅ UPDATED
+
+
+
+Prerequisites
+
+Node.js: v16 or higher
+MongoDB: Local or cloud instance (e.g., MongoDB Atlas)
+Cloudinary Account: For file uploads
+Google OAuth Credentials: For authentication
+
+Setup Instructions
+
+Clone the Repository:
+git clone <repository-url>
+cd wifmart/backend
+
+
+Install Dependencies:
+npm install
+
+
+Configure Environment Variables:Create a .env file in the backend/ directory with the following:
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+PORT=5000
+
+
+Run the Server:
+
+Development (with nodemon):npm run dev
+
+
+Production:npm start
+
+
+
+
+Verify Setup:
+
+The server runs on http://localhost:5000 (or your PORT).
+MongoDB connection logs: MongoDB connected.
+Test endpoints with tools like Postman or the Wifmart frontend.
+
+
+
+API Endpoints
+Authentication
+
+GET /api/auth/google: Initiate Google OAuth login.
+GET /api/auth/google/callback: Google OAuth callback, returns JWT.
+
+User Routes
+
+GET /api/users/me: Get authenticated user’s data (requires JWT).
+GET /api/users/:id: Get user by ID.
+PUT /api/users/:id: Update user details (requires JWT).
+POST /api/users/profile/setup: Set up user profile with file uploads (requires JWT).
+Payload: multipart/form-data (e.g., profile_image, cac_certificate, skills).
+
+
+GET /api/users/profile: Get user profile (requires JWT).
+GET /api/users/hired-providers: Get providers hired by the user (requires JWT).
+GET /api/users/clients: Get clients who hired the user (requires JWT).
+POST /api/users/verification: Apply for verification badge with documents (requires JWT).
+Payload: multipart/form-data (e.g., verification_documents).
+
+
+
+Admin Routes (Requires JWT and Admin Access)
+
+GET /api/admin/users: Get all users.
+GET /api/admin/verifications/pending: Get users with pending CAC or badge verifications.
+POST /api/admin/verifications: Update CAC or badge verification status.
+Payload: { userId, type: "cac" | "badge", status: "Verified" | "Approved" | "Rejected", reason }.
+
+
+
+Other Routes
+
+/api/services: Service-related endpoints (defined in serviceRoutes.js).
+/api/portfolios: Portfolio-related endpoints (defined in portfolioRoutes.js).
+/api/search: Search-related endpoints (defined in searchRoutes.js).
+
+Dependencies
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.4.3",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
+    "jsonwebtoken": "^9.0.1",
+    "multer": "^1.4.5-lts.1",
+    "cloudinary": "^1.37.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
+Development Notes
+
+Authentication: Uses JWT tokens stored in localStorage on the frontend, passed in Authorization: Bearer <token> headers.
+File Uploads: Handled by multer and Cloudinary, supporting images (JPG/PNG) and PDFs.
+Error Handling: Centralized in server.js, logs errors and returns 500 responses in production.
+MongoDB Models:
+User.js: Supports profile fields (profile_image, skills, cac_status) and admin access (isAdmin).
+Service.js: Links providers (user_id) and clients (client_id) for dashboard functionality.
+
+
+Admin Access: Restricted by authMiddleware and authorize('admin') middleware.
+
+Contributing
+
+Fork the repository.
+Create a feature branch: git checkout -b feature/your-feature.
+Commit changes: git commit -m 'Add your feature'.
+Push to the branch: git push origin feature/your-feature.
+Submit a pull request.

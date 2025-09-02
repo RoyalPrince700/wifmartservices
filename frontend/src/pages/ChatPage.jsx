@@ -1,0 +1,358 @@
+import { useState, useEffect, useRef, useContext } from 'react';
+import { getConversations, getMessages, sendMessage, markMessagesAsRead } from '../services/api';
+import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { getSocket } from '../services/socket';
+import { AuthContext } from '../contexts/AuthContext';
+
+const ChatPage = () => {
+  const [conversations, setConversations] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const navigate = useNavigate();
+  const { user: currentUser } = useContext(AuthContext);
+
+  // Create unique chat room ID
+  const getChatRoomId = (user1Id, user2Id) => {
+    return [user1Id, user2Id].sort().join('-');
+  };
+
+  // Setup real-time listeners
+  const setupChatPageListeners = (socket, selectedChat, handleNewMessage) => {
+    if (!socket || !selectedChat || !currentUser) return () => {};
+
+    const chatRoomId = getChatRoomId(currentUser._id, selectedChat._id);
+
+    socket.emit('join-chat', chatRoomId);
+
+    const handleReconnect = () => {
+      console.log('Socket reconnected, rejoining chat room:', chatRoomId);
+      socket.emit('join-chat', chatRoomId);
+    };
+
+    socket.on('new-message', handleNewMessage);
+    socket.on('connect', handleReconnect);
+
+    return () => {
+      socket.off('new-message', handleNewMessage);
+      socket.off('connect', handleReconnect);
+      socket.emit('leave-chat', chatRoomId);
+    };
+  };
+
+  // Filter conversations
+  const filteredConversations = conversations.filter((conv) =>
+    conv.otherUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.lastMessage && conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Load conversations
+  const loadConversations = async () => {
+    try {
+      setConversationsLoading(true);
+      setError('');
+      const data = await getConversations();
+      setConversations(data);
+    } catch (err) {
+      console.error('Failed to load conversations:', err);
+      setError('Failed to load conversations');
+    } finally {
+      setConversationsLoading(false);
+    }
+  };
+
+  // Load messages for selected user
+  const loadMessages = async (conv) => {
+    setLoading(true);
+    try {
+      const data = await getMessages(conv.otherUser._id);
+      setMessages(data);
+      await markMessagesAsRead(conv.otherUser._id);
+    } catch (err) {
+      console.error('Failed to load messages:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle chat selection
+  const handleSelectChat = (conv) => {
+    setSelectedChat(conv.otherUser);
+    loadMessages(conv);
+  };
+
+  // Send a message
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedChat) return;
+
+    try {
+      const sentMsg = await sendMessage(selectedChat._id, newMessage);
+
+      const socket = getSocket();
+      if (socket && socket.connected && currentUser) {
+        const chatRoomId = getChatRoomId(currentUser._id, selectedChat._id);
+        socket.emit('send-message', {
+          chatId: chatRoomId,
+          message: sentMsg.message,
+          senderId: sentMsg.senderId._id || sentMsg.senderId,
+          receiverId: sentMsg.receiverId._id || sentMsg.receiverId,
+          timestamp: sentMsg.timestamp,
+        });
+      }
+
+      setMessages((prev) => [...prev, sentMsg]);
+      setNewMessage('');
+      // Focus input after send
+      inputRef.current?.focus();
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      alert('Failed to send message');
+    }
+  };
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Load conversations on mount
+  useEffect(() => {
+    loadConversations();
+  }, []);
+
+  // Real-time message handling
+  useEffect(() => {
+    if (!currentUser || !selectedChat) return;
+
+    const socket = getSocket();
+    if (!socket) {
+      const retryTimer = setTimeout(() => {
+        const retrySocket = getSocket();
+        if (retrySocket && retrySocket.connected) {
+          setupChatPageListeners(retrySocket, selectedChat, handleNewMessage);
+        }
+      }, 2000);
+      return () => clearTimeout(retryTimer);
+    }
+
+    if (!socket.connected) {
+      console.log('Socket not connected yet...');
+      return;
+    }
+
+    const handleNewMessage = (msg) => {
+      console.log('New message received:', msg);
+      if ([msg.senderId._id, msg.receiverId._id].includes(selectedChat._id)) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+      }
+      loadConversations(); // Update last message in list
+    };
+
+    const cleanup = setupChatPageListeners(socket, selectedChat, handleNewMessage);
+    return () => cleanup();
+  }, [selectedChat, currentUser]);
+
+  // Focus input when chat is selected
+  useEffect(() => {
+    if (selectedChat && !loading) {
+      inputRef.current?.focus();
+    }
+  }, [selectedChat, loading]);
+
+  return (
+    <div className="flex h-screen flex-col md:flex-row bg-white font-sans">
+      {/* Conversations Sidebar */}
+      <div
+        className={`${
+          selectedChat ? 'hidden md:flex' : 'flex'
+        } flex-col w-full md:w-80 lg:w-96 border-r border-gray-200 h-full md:h-auto`}
+      >
+        <div className="p-4 border-b bg-gray-50">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-800">Messages</h2>
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-500 hover:text-gray-700 p-1 md:hidden"
+              title="Go back"
+            >
+              ←
+            </button>
+          </div>
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {conversationsLoading ? (
+            <div className="p-4 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-500 mt-2 text-sm">Loading...</p>
+            </div>
+          ) : error ? (
+            <div className="p-4 text-center">
+              <p className="text-red-500 mb-2 text-sm">{error}</p>
+              <button
+                onClick={loadConversations}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                Try again
+              </button>
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <p className="p-4 text-gray-500 text-center text-sm">
+              {searchTerm ? 'No matches' : 'No conversations yet'}
+            </p>
+          ) : (
+            filteredConversations.map((conv, index) => {
+              const isActive = selectedChat?._id === conv.otherUser._id;
+              return (
+                <div
+                  key={index}
+                  onClick={() => handleSelectChat(conv)}
+                  className={`p-3 sm:p-4 border-b cursor-pointer hover:bg-gray-50 flex items-center gap-3 ${
+                    isActive ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white'
+                  }`}
+                >
+                  <img
+                    src={conv.otherUser.profile_image || 'https://via.placeholder.com/40'}
+                    alt={conv.otherUser.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium text-gray-800 truncate">
+                      {conv.otherUser.name}
+                    </h3>
+                    <p
+                      className={`text-xs truncate mt-0.5 ${
+                        conv.unread ? 'font-medium text-blue-600' : 'text-gray-500'
+                      }`}
+                    >
+                      {conv.lastMessage}
+                    </p>
+                  </div>
+                  <div className="text-xs text-gray-400 whitespace-nowrap">
+                    {formatDistanceToNow(new Date(conv.timestamp), { addSuffix: true })}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Chat Window */}
+      <div
+        className={`${
+          selectedChat ? 'flex' : 'hidden'
+        } flex-col flex-1 bg-gray-50 h-full`}
+      >
+        {selectedChat && (
+          <div className="flex flex-col h-full">
+            {/* Chat Header */}
+            <div className="shrink-0 p-3 sm:p-4 bg-white border-b flex items-center gap-3 shadow-sm">
+              <button
+                onClick={() => setSelectedChat(null)}
+                className="md:hidden text-gray-600 hover:text-gray-900"
+                aria-label="Back to conversations"
+              >
+                ←
+              </button>
+              <img
+                src={selectedChat.profile_image || 'https://via.placeholder.com/40'}
+                alt={selectedChat.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div>
+                <h3 className="font-medium text-gray-800 text-sm sm:text-base">
+                  {selectedChat.name}
+                </h3>
+                <p className="text-xs text-green-600">Online</p>
+              </div>
+            </div>
+
+            {/* Messages Area - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3">
+              {loading ? (
+                <p className="text-center text-gray-500 text-sm">Loading messages...</p>
+              ) : messages.length === 0 ? (
+                <p className="text-center text-gray-500 text-sm">Start the conversation</p>
+              ) : (
+                messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${
+                      msg.senderId._id === selectedChat._id ? 'justify-start' : 'justify-end'
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[75%] sm:max-w-xs px-3 py-2 rounded-lg shadow-sm text-sm ${
+                        msg.senderId._id === selectedChat._id
+                          ? 'bg-white text-gray-800'
+                          : 'bg-blue-600 text-white'
+                      }`}
+                    >
+                      <p>{msg.message}</p>
+                      <span className="text-xs opacity-90 mt-1 block">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Message Input - Fixed at Bottom */}
+            <form onSubmit={handleSend} className="shrink-0 p-3 sm:p-4 bg-white border-t sticky bottom-0">
+              <div className="flex gap-2">
+                <input
+                  ref={inputRef}
+                  id="chat-input"
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white rounded-full px-4 py-2 hover:bg-blue-700 text-sm font-medium"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* Placeholder when no chat selected (visible only on desktop) */}
+      {!selectedChat && (
+        <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-500">
+          <p className="text-lg">Select a conversation to start chatting</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ChatPage;
