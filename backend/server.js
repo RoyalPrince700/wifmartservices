@@ -25,8 +25,8 @@ import chatRoutes from './routes/chatRoutes.js';
 import './config/googleOAuth.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 
-// 👇 Create Express app
-const app = express();
+// Prefer the shared app (used by serverless too)
+import app from './app.js';
 
 // 👇 Create HTTP server for Socket.IO
 const server = http.createServer(app);
@@ -116,19 +116,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 🔗 MongoDB Connection
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('✅ MongoDB connected successfully');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
+// DB connection is initialized in app.js for both environments
 
 // 🔁 Socket.IO Connection
 io.on('connection', (socket) => {
@@ -172,10 +160,8 @@ io.on('connection', (socket) => {
 
 // 🔼 Start Server
 const PORT = process.env.PORT || 5000;
-connectDB().then(() => {
-  server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-    console.log(`📄 API Docs: http://localhost:${PORT}/api/health`);
-  });
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+  console.log(`📄 API Docs: http://localhost:${PORT}/api/health`);
 });

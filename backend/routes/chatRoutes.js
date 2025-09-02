@@ -52,7 +52,9 @@ router.post('/mark-read', authMiddleware, async (req, res) => {
 
     // Optionally: Emit "read receipt"
     const io = req.app.get('io');
-    io.to(chatId).emit('message-read', { chatId, readerId: currentUserId });
+    if (io && typeof io.to === 'function') {
+      io.to(chatId).emit('message-read', { chatId, readerId: currentUserId });
+    }
 
     res.json({ success: true });
   } catch (error) {
