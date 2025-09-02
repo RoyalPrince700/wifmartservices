@@ -4,8 +4,7 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://YOUR-RENDER-BACKEND.onrender.com/api/$1" }
-  ],
-  "ignoreCommand": "echo 'Using monorepo config'"
+  ]
 }
 
 
