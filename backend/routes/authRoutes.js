@@ -8,7 +8,7 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: 'http://localhost:5173/login' }),
+  passport.authenticate('google', { session: false, failureRedirect: process.env.FRONTEND_URL + '/signin' }),
   (req, res) => {
     console.log('Callback success, user and token:', req.user);
     res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${req.user.token}`);
