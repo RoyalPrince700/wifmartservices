@@ -53,6 +53,11 @@ const ChatPage = () => {
     (conv.lastMessage && conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Check if user is verified (same logic as ProfilePage)
+  const isUserVerified = (user) => {
+    return user?.isVerifiedBadge || user?.isVerified || user?.verification_status?.toLowerCase() === "approved";
+  };
+
   // Load conversations
   const loadConversations = async () => {
     try {
@@ -171,12 +176,12 @@ const ChatPage = () => {
   }, [selectedChat, loading]);
 
   return (
-    <div className="flex h-screen flex-col md:flex-row bg-white font-sans">
+    <div className="flex h-[calc(100vh-4rem)] flex-col md:flex-row bg-white font-sans">
       {/* Conversations Sidebar */}
       <div
         className={`${
           selectedChat ? 'hidden md:flex' : 'flex'
-        } flex-col w-full md:w-80 lg:w-96 border-r border-gray-200 h-full md:h-auto`}
+        } flex-col w-full md:w-80 lg:w-96 border-r border-gray-200 h-full`}
       >
         <div className="p-4 border-b bg-gray-50">
           <div className="flex items-center justify-between mb-3">
@@ -198,7 +203,7 @@ const ChatPage = () => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-h-0">
           {conversationsLoading ? (
             <div className="p-4 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -235,8 +240,24 @@ const ChatPage = () => {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-gray-800 truncate">
+                    <h3 className="text-sm font-medium text-gray-800 truncate flex items-center">
                       {conv.otherUser.name}
+                      {isUserVerified(conv.otherUser) && (
+                        <span className="flex-shrink-0 ml-1 bg-blue-500 text-white rounded-full p-0.5 shadow-sm flex items-center justify-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-2.5 w-2.5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      )}
                     </h3>
                     <p
                       className={`text-xs truncate mt-0.5 ${
@@ -260,10 +281,10 @@ const ChatPage = () => {
       <div
         className={`${
           selectedChat ? 'flex' : 'hidden'
-        } flex-col flex-1 bg-gray-50 h-full`}
+        } flex-col flex-1 bg-gray-50 h-full min-h-0`}
       >
         {selectedChat && (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full min-h-0">
             {/* Chat Header */}
             <div className="shrink-0 p-3 sm:p-4 bg-white border-b flex items-center gap-3 shadow-sm">
               <button
@@ -279,15 +300,31 @@ const ChatPage = () => {
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
-                <h3 className="font-medium text-gray-800 text-sm sm:text-base">
+                <h3 className="font-medium text-gray-800 text-sm sm:text-base flex items-center">
                   {selectedChat.name}
+                  {isUserVerified(selectedChat) && (
+                    <span className="flex-shrink-0 ml-1 bg-blue-500 text-white rounded-full p-0.5 shadow-sm flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-2.5 w-2.5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  )}
                 </h3>
                 <p className="text-xs text-green-600">Online</p>
               </div>
             </div>
 
             {/* Messages Area - Scrollable */}
-            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3">
+            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3 min-h-0">
               {loading ? (
                 <p className="text-center text-gray-500 text-sm">Loading messages...</p>
               ) : messages.length === 0 ? (

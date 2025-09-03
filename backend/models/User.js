@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
 
   // ✅ Skills
   skills: [{ type: String, default: '' }],
+  
+  // ✅ Experience & Pitch
+  experience_pitch: { type: String, default: '' },
 
   // ✅ Social Media
   instagram_handle: { type: String, default: '' },

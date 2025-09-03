@@ -1,6 +1,8 @@
 import { HiStar, HiCheckCircle } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
+
+
 const FeaturedProviders = () => {
   const navigate = useNavigate();
 
@@ -12,7 +14,7 @@ const FeaturedProviders = () => {
       rating: 4.9,
       reviews: 128,
       rate: "$45/hr",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      image: null, // Will use fallback avatar
       skills: ["React", "Node.js", "MongoDB"],
       verified: true
     },
@@ -23,7 +25,7 @@ const FeaturedProviders = () => {
       rating: 4.8,
       reviews: 96,
       rate: "$50/hr",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      image: null, // Will use fallback avatar
       skills: ["Figma", "UI Design", "Prototyping"],
       verified: true
     },
@@ -34,7 +36,7 @@ const FeaturedProviders = () => {
       rating: 4.7,
       reviews: 142,
       rate: "$35/hr",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      image: null, // Will use fallback avatar
       skills: ["SEO", "Blogging", "Copywriting"],
       verified: true
     },
@@ -45,7 +47,7 @@ const FeaturedProviders = () => {
       rating: 4.9,
       reviews: 87,
       rate: "$55/hr",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      image: null, // Will use fallback avatar
       skills: ["SEO", "Google Ads", "Social Media"],
       verified: true
     }
@@ -73,21 +75,14 @@ const FeaturedProviders = () => {
               className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg border border-gray-100"
             >
               <div className="p-6">
-                <div className="flex items-center">
-                  <img
-                    className="h-16 w-16 rounded-full object-cover"
-                    src={provider.image}
-                    alt={provider.name}
-                  />
-                  <div className="ml-4">
-                    <div className="flex items-center">
-                      <h3 className="text-lg font-medium text-gray-900">{provider.name}</h3>
-                      {provider.verified && (
-                        <HiCheckCircle className="h-5 w-5 text-blue-500 ml-1" />
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">{provider.title}</p>
+                <div>
+                  <div className="flex items-center">
+                    <h3 className="text-lg font-medium text-gray-900">{provider.name}</h3>
+                    {provider.verified && (
+                      <HiCheckCircle className="h-5 w-5 text-blue-500 ml-1" />
+                    )}
                   </div>
+                  <p className="text-sm text-gray-500 mt-1">{provider.title}</p>
                 </div>
 
                 <div className="mt-4 flex items-center">
@@ -114,8 +109,10 @@ const FeaturedProviders = () => {
                   ))}
                 </div>
 
-                <button className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                  View Profile
+                <button className="mt-6 w-full group relative bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 hover:-translate-y-1 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                  <span className="relative">View Profile</span>
+                  <div className="absolute inset-0 rounded-lg bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
                 </button>
               </div>
             </div>
@@ -125,9 +122,11 @@ const FeaturedProviders = () => {
         <div className="mt-10 text-center">
           <button
             onClick={() => navigate('/search')}
-            className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="group relative inline-flex items-center px-8 py-4 border-2 border-gray-300 shadow-lg text-base font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
           >
-            Browse All Providers
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <span className="relative">Browse All Providers</span>
+            <div className="absolute inset-0 rounded-xl bg-gray-400/10 scale-0 group-active:scale-100 transition-transform duration-150"></div>
           </button>
         </div>
       </div>

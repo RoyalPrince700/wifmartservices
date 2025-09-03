@@ -67,26 +67,42 @@ export const sendHireRequest = async (req, res) => {
 export const getHireRequests = async (req, res) => {
   try {
     const requests = await Service.find({ provider_id: req.user._id })
-      .populate('client_id', 'name profile_image whatsapp')
-      .sort({ created_at: -1 });
+      .populate('client_id', 'name profile_image whatsapp verification_status isVerifiedBadge')
+      .sort({ created_at: -1 })
+      .lean();
 
     // Map requests to match ClientRequestModal's expected camelCase
-    const formattedRequests = requests.map((service) => ({
-      id: service._id,
-      client_id: service.client_id,
-      title: service.title,
-      description: service.description,
-      eventDate: service.event_date, // Convert to camelCase
-      location: service.location,
-      budget: service.budget,
-      phone: service.phone,
-      email: service.email,
-      message: service.message,
-      attachmentUrl: service.attachment_url, // Convert to camelCase
-      status: service.status,
-      read: service.read,
-      created_at: service.created_at,
-    }));
+    // Use explicit client fields to ensure name is preserved
+    const formattedRequests = requests.map((service) => {
+      const client = service.client_id
+        ? {
+            _id: service.client_id._id,
+            name: service.client_id.name,
+            profile_image: service.client_id.profile_image,
+            whatsapp: service.client_id.whatsapp,
+            isVerifiedBadge: service.client_id.isVerifiedBadge,
+            verification_status: service.client_id.verification_status,
+            isVerified: service.client_id.verification_status === 'Approved',
+          }
+        : null;
+
+      return {
+        id: service._id,
+        client_id: client,
+        title: service.title,
+        description: service.description,
+        eventDate: service.event_date, // Convert to camelCase
+        location: service.location,
+        budget: service.budget,
+        phone: service.phone,
+        email: service.email,
+        message: service.message,
+        attachmentUrl: service.attachment_url, // Convert to camelCase
+        status: service.status,
+        read: service.read,
+        created_at: service.created_at,
+      };
+    });
 
     await Service.updateMany(
       { provider_id: req.user._id, read: false },

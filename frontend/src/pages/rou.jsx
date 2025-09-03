@@ -163,7 +163,7 @@ const ProfilePage = () => {
             {provider.portfolio_images.map((image, index) => (
               <img
                 key={index}
-                src={image}
+                src={typeof image === 'string' ? image : image.url}
                 alt={`Portfolio item ${index + 1}`}
                 className="w-full h-48 object-cover rounded-md border border-gray-200"
               />

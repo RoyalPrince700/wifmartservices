@@ -1,44 +1,27 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from 'react-router-dom';
-import GoogleSignIn from '../components/Auth/GoogleSignIn';
+import GoogleSignIn from "../components/Auth/GoogleSignIn.jsx";
+
 import cubeImage from "../assets/cylinder.png";
 import waveImage from "../assets/noodle.png";
 
-const Signup = () => {
-
+function Auth() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#183EC2] via-[#4F46E5] to-[#EAEEFE] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F6FAFF] via-[#EEF5FF] to-[#FFFFFF] relative overflow-hidden">
       {/* Animated 3D Shapes */}
       <motion.img
         src={cubeImage}
         alt="Cube"
-        className="absolute top-10 left-20 w-48 opacity-20"
-        animate={{
-          translateY: [-30, 30],
-          rotate: [0, 360],
-        }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "mirror",
-          duration: 8,
-          ease: "easeInOut",
-        }}
+        className="absolute top-10 left-20 w-48 opacity-10"
+        animate={{ translateY: [-30, 30], rotate: [0, 360] }}
+        transition={{ repeat: Infinity, repeatType: "mirror", duration: 8, ease: "easeInOut" }}
       />
       <motion.img
         src={waveImage}
         alt="Wave"
-        className="absolute bottom-10 right-10 w-60 opacity-20"
-        animate={{
-          translateX: [-20, 20],
-          scale: [1, 1.1],
-        }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "mirror",
-          duration: 6,
-          ease: "easeInOut",
-        }}
+        className="absolute bottom-10 right-10 w-60 opacity-10"
+        animate={{ translateX: [-20, 20], scale: [1, 1.1] }}
+        transition={{ repeat: Infinity, repeatType: "mirror", duration: 6, ease: "easeInOut" }}
       />
 
       {/* Floating particles */}
@@ -47,19 +30,9 @@ const Signup = () => {
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-white rounded-full opacity-30"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0.3, 0.8, 0.3],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
+            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
+            animate={{ y: [0, -100, 0], opacity: [0.3, 0.8, 0.3] }}
+            transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
           />
         ))}
       </div>
@@ -72,7 +45,7 @@ const Signup = () => {
         className="relative z-10 w-full max-w-md mx-4"
       >
         {/* Glass morphism card */}
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-2xl p-8 shadow-2xl">
           {/* Logo/Brand */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -80,8 +53,8 @@ const Signup = () => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl font-bold text-white mb-2">Wifmart</h1>
-            <p className="text-white/80 text-lg">Connect with Service Providers</p>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Wifmart</h1>
+            <p className="text-slate-600 text-lg">Sign in or join with Google</p>
           </motion.div>
 
           {/* Google Auth Section */}
@@ -92,7 +65,7 @@ const Signup = () => {
             className="space-y-6"
           >
             {/* Info Card */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
+            <div className="bg-white/50 backdrop-blur-sm border border-white/40 rounded-xl p-4 text-center">
               <div className="flex items-center justify-center mb-3">
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -103,9 +76,9 @@ const Signup = () => {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-white font-semibold text-lg mb-2">Quick & Secure Sign Up</h3>
-              <p className="text-white/70 text-sm leading-relaxed">
-                Join Wifmart with your Google account for instant access to our marketplace of skilled service providers.
+              <h3 className="text-slate-900 font-semibold text-lg mb-2">Quick & Secure Access</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Continue with your Google account to access Wifmart. No passwords, just secure OAuth.
               </p>
             </div>
 
@@ -121,58 +94,42 @@ const Signup = () => {
               transition={{ delay: 0.6, duration: 0.6 }}
               className="space-y-3"
             >
-              <div className="flex items-center text-white/80 text-sm">
-                <svg className="w-4 h-4 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center text-slate-700 text-sm">
+                <svg className="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
-                No password required
+                No passwords to remember
               </div>
-              <div className="flex items-center text-white/80 text-sm">
-                <svg className="w-4 h-4 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center text-slate-700 text-sm">
+                <svg className="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
-                Instant profile creation
+                Instant profile bootstrap
               </div>
-              <div className="flex items-center text-white/80 text-sm">
-                <svg className="w-4 h-4 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center text-slate-700 text-sm">
+                <svg className="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
-                Secure OAuth authentication
+                Secure OAuth 2.0
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Sign In Link */}
-          <motion.div
+          {/* Bottom text */}
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="text-center mt-8 pt-6 border-t border-white/10"
+            transition={{ delay: 1, duration: 0.6 }}
+            className="text-center text-slate-500 text-xs mt-6"
           >
-            <p className="text-white/70 text-sm">
-              Already have an account?{" "}
-              <Link 
-                to="/signin" 
-                className="text-white font-semibold hover:text-blue-200 transition-colors duration-200 underline decoration-2 underline-offset-2"
-              >
-                Sign In
-              </Link>
-            </p>
-          </motion.div>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </motion.p>
         </div>
-
-        {/* Bottom text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="text-center text-white/60 text-xs mt-6"
-        >
-          By signing up, you agree to our Terms of Service and Privacy Policy
-        </motion.p>
       </motion.div>
     </div>
   );
-};
+}
 
-export default Signup;
+export default Auth;
+
+

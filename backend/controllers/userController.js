@@ -22,10 +22,10 @@ export const getUser = async (req, res, next) => {
  */
 export const updateUser = async (req, res, next) => {
   try {
-    const { name, bio, phone, whatsapp, portfolio_link, profile_image } = req.body;
+    const { name, bio, experience_pitch, phone, whatsapp, portfolio_link, profile_image } = req.body;
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { name, bio, phone, whatsapp, portfolio_link, profile_image },
+      { name, bio, experience_pitch, phone, whatsapp, portfolio_link, profile_image },
       { new: true, runValidators: true }
     ).select('-googleId');
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -59,6 +59,7 @@ export const setupProfile = async (req, res, next) => {
     const {
       name,
       skills,
+      experience_pitch,
       whatsapp,
       phone,
       instagram_handle,
@@ -75,13 +76,24 @@ export const setupProfile = async (req, res, next) => {
     // ✅ Name
     if (name) updateData.name = name;
 
-    // ✅ Skills: split by comma or ||
+    // ✅ Skills: split by comma or || and capitalize
     if (skills) {
+      const capitalizeWords = (str) => {
+        return str
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      };
+      
       updateData.skills = skills
         .split(/,|\|\|/)
-        .map(skill => skill.trim())
+        .map(skill => capitalizeWords(skill.trim()))
         .filter(skill => skill);
     }
+
+    // ✅ Experience & Pitch
+    if (experience_pitch) updateData.experience_pitch = experience_pitch;
 
     // ✅ Contact Info
     if (whatsapp) updateData.whatsapp = whatsapp;
@@ -118,19 +130,21 @@ export const setupProfile = async (req, res, next) => {
       }
 
       // 🖼️ Portfolio Images
-      // backend/controllers/userController.js
-if (req.files['portfolio_images']) {
-  const uploadPromises = req.files['portfolio_images'].map(async (file) => {
-    const result = await uploadToCloudinary(file, 'wifmart/portfolio');
-    return result.secure_url;
-  });
-  const newUrls = await Promise.all(uploadPromises);
+      if (req.files['portfolio_images']) {
+        const uploadPromises = req.files['portfolio_images'].map(async (file) => {
+          const result = await uploadToCloudinary(file, 'wifmart/portfolio');
+          return {
+            url: result.secure_url,
+            public_id: result.public_id
+          };
+        });
+        const newImages = await Promise.all(uploadPromises);
 
-  updateData.portfolio_images = [
-    ...(req.user.portfolio_images || []), // Keep old
-    ...newUrls                            // Add new
-  ];
-}
+        updateData.portfolio_images = [
+          ...(req.user.portfolio_images || []), // Keep old
+          ...newImages                          // Add new
+        ];
+      }
     }
 
     // ✅ Recalculate profile completion
@@ -219,6 +233,10 @@ export const getHiredProviders = async (req, res, next) => {
         hireDate: service.created_at || service.createdAt,
         status: service.status,
         serviceId: service._id,
+        // ✅ Add verification fields
+        isVerifiedBadge: service.provider_id.isVerifiedBadge,
+        isVerified: service.provider_id.verification_status === 'Approved',
+        verification_status: service.provider_id.verification_status,
       };
     });
 
@@ -274,6 +292,10 @@ export const getClients = async (req, res, next) => {
         service: service.title,
         since: service.created_at || service.createdAt,
         status: service.status,
+        // ✅ Add verification fields
+        isVerifiedBadge: service.client_id.isVerifiedBadge,
+        isVerified: service.client_id.verification_status === 'Approved',
+        verification_status: service.client_id.verification_status,
         requestDetails: {
           title: service.title,
           message: service.message,

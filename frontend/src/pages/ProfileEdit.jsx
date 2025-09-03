@@ -25,6 +25,7 @@ const ProfileEdit = ({ setActiveTab }) => {
   const [formData, setFormData] = useState({
     name: '',
     skills: [],
+    experience_pitch: '',
     whatsapp: '',
     phone: '',
     instagram_handle: '',
@@ -40,9 +41,20 @@ const ProfileEdit = ({ setActiveTab }) => {
     portfolio_image_urls: [],     // Existing URLs from DB
   });
 
+  const [newSkill, setNewSkill] = useState('');
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Function to capitalize first letter of each word
+  const capitalizeWords = (str) => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
 
   // Populate form with existing user data
   useEffect(() => {
@@ -50,7 +62,8 @@ const ProfileEdit = ({ setActiveTab }) => {
       setFormData((prev) => ({
         ...prev,
         name: user.name || '',
-        skills: user.skills || [],
+        skills: (user.skills || []).map(skill => capitalizeWords(skill)),
+        experience_pitch: user.experience_pitch || '',
         whatsapp: user.whatsapp || '',
         phone: user.phone || '',
         instagram_handle: user.instagram_handle || '',
@@ -60,7 +73,7 @@ const ProfileEdit = ({ setActiveTab }) => {
         location_state: user.location_state || '',
         physical_address: user.physical_address || '',
         cac_number: user.cac_number || '',
-        portfolio_image_urls: user.portfolio_images || [],
+        portfolio_image_urls: user.portfolio_images?.map(img => img.url) || [],
       }));
     }
   }, [user]);
@@ -70,13 +83,33 @@ const ProfileEdit = ({ setActiveTab }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSkillsChange = (e) => {
-    const value = e.target.value;
-    const skills = value
-      .split(/,|\|\|/)
-      .map(skill => skill.trim())
-      .filter(skill => skill);
-    setFormData({ ...formData, skills });
+
+
+  const addSkill = () => {
+    const trimmedSkill = newSkill.trim();
+    const capitalizedSkill = capitalizeWords(trimmedSkill);
+    
+    if (trimmedSkill && !formData.skills.includes(capitalizedSkill)) {
+      setFormData({
+        ...formData,
+        skills: [...formData.skills, capitalizedSkill]
+      });
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (skillToRemove) => {
+    setFormData({
+      ...formData,
+      skills: formData.skills.filter(skill => skill !== skillToRemove)
+    });
+  };
+
+  const handleSkillKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill();
+    }
   };
 
   const handleFileChange = (e) => {
@@ -84,7 +117,7 @@ const ProfileEdit = ({ setActiveTab }) => {
 
     if (name === 'portfolio_images') {
       const fileArray = Array.from(files);
-      const maxFiles = user?.verification_status === 'Approved' ? 15 : 3;
+      const maxFiles = user?.verification_status === 'Approved' ? 10 : 3;
       const totalExisting = formData.portfolio_image_urls.length;
       const totalCurrent = totalExisting + formData.portfolio_images.length;
 
@@ -129,7 +162,12 @@ const ProfileEdit = ({ setActiveTab }) => {
 
     const uploadFormData = new FormData();
     Object.keys(formData).forEach(key => {
-      if (Array.isArray(formData[key])) {
+      if (key === 'skills') {
+        // Send skills as comma-separated string to match backend expectation
+        if (formData.skills.length > 0) {
+          uploadFormData.append('skills', formData.skills.join(', '));
+        }
+      } else if (Array.isArray(formData[key])) {
         formData[key].forEach(item => uploadFormData.append(key, item));
       } else if (formData[key]) {
         uploadFormData.append(key, formData[key]);
@@ -159,7 +197,7 @@ const ProfileEdit = ({ setActiveTab }) => {
     return null;
   }
 
-  const maxPortfolio = user?.verification_status === 'Approved' ? 15 : 3;
+  const maxPortfolio = user?.verification_status === 'Approved' ? 10 : 3;
   const totalExisting = formData.portfolio_image_urls.length;
   const totalNew = formData.portfolio_images.length;
   const totalUploaded = totalExisting + totalNew;
@@ -228,7 +266,7 @@ const ProfileEdit = ({ setActiveTab }) => {
           <label className="block text-sm font-medium text-gray-700 mb-3">Portfolio Images (max 5MB each)</label>
           <p className="text-xs text-gray-500 mb-2">
             {user?.verification_status === 'Approved'
-              ? 'You can upload up to 15 images'
+              ? 'You can upload up to 10 images'
               : 'You can upload up to 3 images. Get verified to upload more.'}
           </p>
 
@@ -267,12 +305,13 @@ const ProfileEdit = ({ setActiveTab }) => {
 
   {/* Show upload slots for remaining capacity */}
   {Array.from({ length: maxPortfolio - totalUploaded }).map((_, index) => (
-    <label
+    <div
       key={`upload-slot-${index}`}
       className="flex items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
+      onClick={() => document.getElementById('portfolio-upload').click()}
     >
       <FaImage className="text-gray-400" size={24} />
-    </label>
+    </div>
   ))}
 
   {/* 4th Box: Verification Prompt (Only after 3 images, if not verified) */}
@@ -285,7 +324,7 @@ const ProfileEdit = ({ setActiveTab }) => {
             <div>
               <p className="font-medium">Want to upload more images?</p>
               <p className="text-sm text-gray-600 mt-1">
-                Get verified to upload up to 15 portfolio images and unlock premium features.
+                Get verified to upload up to 10 portfolio images and unlock premium features.
               </p>
               <button
                 onClick={(e) => {
@@ -344,17 +383,72 @@ const ProfileEdit = ({ setActiveTab }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Skills (separate with comma or ||)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Skills
             </label>
-            <input
-              type="text"
-              name="skills"
-              value={formData.skills.join(', ')}
-              onChange={handleSkillsChange}
+            
+            {/* Display existing skills as tags */}
+            {formData.skills.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(skill)}
+                      className="ml-2 text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Add new skill input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                onKeyPress={handleSkillKeyPress}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Add a skill (e.g., Fashion Designer)"
+              />
+              <button
+                type="button"
+                onClick={addSkill}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-1"
+              >
+                <FaPlus size={12} />
+                Add
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Press Enter or click Add to add a skill. Click the × on any skill to remove it.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              About Your Experience & Pitch
+            </label>
+            <textarea
+              name="experience_pitch"
+              value={formData.experience_pitch}
+              onChange={handleInputChange}
+              rows={4}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., Fashion Designer, Makeup Artist"
+              placeholder="Tell potential clients about your experience, expertise, and what makes you unique. Share your story, achievements, and why they should choose you..."
             />
+            <p className="mt-1 text-xs text-gray-500">
+              This is your chance to pitch yourself and showcase your experience to potential clients.
+            </p>
           </div>
 
           <div>
@@ -459,26 +553,92 @@ const ProfileEdit = ({ setActiveTab }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">CAC Number</label>
-            <input
-              type="text"
-              name="cac_number"
-              value={formData.cac_number}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., RC1234567"
-            />
+            <label className="block text-sm font-medium text-gray-700">
+              CAC Number
+              <span className="text-xs text-gray-500 ml-2">
+                (Corporate Affairs Commission - Business Registration Number)
+              </span>
+            </label>
+            {user?.verification_status === 'Approved' || user?.isVerifiedBadge ? (
+              <input
+                type="text"
+                name="cac_number"
+                value={formData.cac_number}
+                onChange={handleInputChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., RC1234567"
+              />
+            ) : (
+              <div className="mt-1 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-amber-800">
+                      CAC Number Requires Verification
+                    </h3>
+                    <div className="mt-2 text-sm text-amber-700">
+                      <p className="mb-2">
+                        <strong>CAC</strong> stands for <strong>Corporate Affairs Commission</strong> - Nigeria's official business registration body.
+                      </p>
+                      <p className="mb-2">
+                        Your CAC number is your official business registration number (e.g., RC1234567).
+                      </p>
+                      <p>
+                        To add your CAC number, you need to be verified first. Go to Dashboard → Verification tab.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">CAC Certificate (PDF/Image)</label>
-            <input
-              type="file"
-              name="cac_certificate"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange}
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
+            <label className="block text-sm font-medium text-gray-700">
+              CAC Certificate (PDF/Image)
+              <span className="text-xs text-gray-500 ml-2">
+                (Upload your official business registration certificate)
+              </span>
+            </label>
+            {user?.verification_status === 'Approved' || user?.isVerifiedBadge ? (
+              <input
+                type="file"
+                name="cac_certificate"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange}
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            ) : (
+              <div className="mt-1 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-amber-800">
+                      CAC Certificate Upload Requires Verification
+                    </h3>
+                    <div className="mt-2 text-sm text-amber-700">
+                      <p className="mb-2">
+                        <strong>CAC Certificate</strong> is your official business registration document from the Corporate Affairs Commission.
+                      </p>
+                      <p className="mb-2">
+                        To upload your CAC certificate, you need to be verified first.
+                      </p>
+                      <p>
+                        Go to the Dashboard → Verification tab to get verified.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -486,14 +646,17 @@ const ProfileEdit = ({ setActiveTab }) => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 px-4 font-semibold rounded-md transition-all duration-300 
-            flex items-center justify-center
-            ${loading ? 'bg-green-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className={`w-full py-3 px-6 font-semibold rounded-lg transition-all duration-300 
+            flex items-center justify-center text-white
+            ${loading 
+              ? 'bg-blue-500 cursor-not-allowed opacity-75' 
+              : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800'
+            }`}
         >
           {loading ? (
             <>
               <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -512,7 +675,7 @@ const ProfileEdit = ({ setActiveTab }) => {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Saving...
+              Saving Profile...
             </>
           ) : (
             'Save Profile'

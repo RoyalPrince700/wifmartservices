@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { HiStar, HiLocationMarker, HiCurrencyDollar } from 'react-icons/hi';
 
@@ -80,15 +81,11 @@ console.log("✅ Verified Check:", {
               )}
             </div>
 
-            {/* Location & Rate */}
+            {/* Location */}
             <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-gray-600">
               <span className="flex items-center">
                 <HiLocationMarker className="h-4 w-4 mr-1" />
                 {location}
-              </span>
-              <span className="flex items-center">
-                <HiCurrencyDollar className="h-4 w-4 mr-1" />
-                ${hourlyRate}/hr
               </span>
             </div>
 
@@ -103,10 +100,12 @@ console.log("✅ Verified Check:", {
           </div>
         </div>
 
-        {/* Bio Preview */}
-        {bio && (
+        {/* Bio/Experience Preview */}
+        {(bio || provider.experience_pitch) && (
           <div className="px-5 pb-4">
-            <p className="text-sm text-gray-700 line-clamp-2">{bio}</p>
+            <p className="text-sm text-gray-700 line-clamp-2">
+              {provider.experience_pitch || bio}
+            </p>
           </div>
         )}
 

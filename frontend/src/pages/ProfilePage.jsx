@@ -67,6 +67,14 @@ const ProfilePage = () => {
           <p className="text-gray-600">{provider.skills?.join(', ')}</p>
           <p className="text-gray-500">{provider.location_state}</p>
           
+          {/* Experience & Pitch Section */}
+          {provider.experience_pitch && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">About & Experience</h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{provider.experience_pitch}</p>
+            </div>
+          )}
+          
           {/* Social Media Links */}
           <div className="mt-4">
             {provider.instagram_handle && (
@@ -130,16 +138,7 @@ const ProfilePage = () => {
           </button>
         )}
 
-        {provider.whatsapp && (
-          <a
-            href={`https://wa.me/${provider.whatsapp}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-          >
-            📱 WhatsApp
-          </a>
-        )}
+        
       </div>
 
       {/* Portfolio Section */}
@@ -163,7 +162,7 @@ const ProfilePage = () => {
             {provider.portfolio_images.map((image, index) => (
               <img
                 key={index}
-                src={image}
+                src={typeof image === 'string' ? image : image.url}
                 alt={`Portfolio item ${index + 1}`}
                 className="w-full h-48 object-cover rounded-md border border-gray-200"
               />

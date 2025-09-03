@@ -1,239 +1,213 @@
-# EliteRetoucher Website Requirements
+# Wifmart - Requirements Specification
 
-## 🎯 Project Overview
+## 📋 Overview
 
-A high-end photo retouching service website that emphasizes speed, professionalism, and user experience. The site caters to photographers and brands seeking premium retouching services through either pay-per-image or subscription models.
+Wifmart is an online marketplace platform that connects service providers with clients. Service providers can create profiles, showcase their portfolios, and clients can search and hire them based on skills and names.
+
+## 🎯 Functional Requirements
+
+### 1. User Authentication & Authorization
+- **FR1.1:** Users must be able to sign in using Google OAuth 2.0
+- **FR1.2:** System must generate and manage JWT tokens for session management
+- **FR1.3:** Secure authentication flow with proper error handling
+- **FR1.4:** Users must be able to sign out securely
+
+### 2. User Profile Management
+- **FR2.1:** Users must be able to create and update their profiles with:
+  - Full name
+  - Bio/description
+  - Phone number
+  - WhatsApp contact link
+  - External portfolio link
+  - Profile picture
+- **FR2.2:** Profile pictures must be uploaded to Cloudinary storage
+- **FR2.3:** Users must be able to view and edit their profile information
+- **FR2.4:** System must validate profile data before saving
+
+### 3. Service Provider Services Management
+- **FR3.1:** Service providers must be able to add multiple skills/services
+- **FR3.2:** Each service must include:
+  - Skill name
+  - Category
+  - Description
+- **FR3.3:** Service providers must be able to update and delete services
+- **FR3.4:** System must validate service data
+
+### 4. Portfolio Management
+- **FR4.1:** Service providers must be able to upload up to 5 portfolio images
+- **FR4.2:** Portfolio images must be stored in Cloudinary
+- **FR4.3:** Optional external portfolio/social media links must be supported
+- **FR4.4:** Service providers must be able to delete portfolio items
+- **FR4.5:** Images must be properly optimized and named (userId_timestamp.extension)
+
+### 5. Search Functionality
+- **FR5.1:** Clients must be able to search service providers by:
+  - Skills (skill-based search)
+  - Name (name-based search)
+- **FR5.2:** Search results must display relevant service provider profiles
+- **FR5.3:** Search must be case-insensitive and support partial matches
+
+### 6. Notification System
+- **FR6.1:** Users must receive welcome notifications upon sign-in
+- **FR6.2:** System must support notification management
+- **FR6.3:** Future: Email notifications for important events
+
+### 7. User Interface & Navigation
+- **FR7.1:** Platform must have responsive design for mobile and desktop
+- **FR7.2:** Public pages must include:
+  - Home page with search functionality
+  - Service provider listings
+  - Individual profile view pages
+- **FR7.3:** Authenticated users must have access to dashboard with:
+  - Profile management
+  - Service management
+  - Portfolio management
 
 ## 🔧 Technical Requirements
 
-### Core Technology Stack
-- **Frontend Framework**: React 19.1.1
-- **Build Tool**: Vite 7.1.2 (for fast development and optimized builds)
-- **Styling**: Tailwind CSS 3.x (utility-first CSS framework)
-- **Backend**: Supabase (BaaS for authentication, database, and storage)
-- **Animations**: Framer Motion (smooth transitions and interactions)
-- **Routing**: React Router DOM (client-side navigation)
-- **Icons**: Lucide React (consistent iconography)
+### Frontend
+- **TR1.1:** Built with React (JSX) using Vite as build tool
+- **TR1.2:** Styled with TailwindCSS for responsive design
+- **TR1.3:** Must support modern browsers (Chrome, Firefox, Safari, Edge)
+- **TR1.4:** Must be mobile-responsive
+- **TR1.5:** Must handle loading states and error states gracefully
 
-### Dependencies
-```json
-{
-  "dependencies": {
-    "@supabase/supabase-js": "^2.55.0",
-    "framer-motion": "^12.23.12",
-    "lucide-react": "^0.539.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.1"
-  },
-  "devDependencies": {
-    "tailwindcss": "latest",
-    "postcss": "latest",
-    "autoprefixer": "latest",
-    "@vitejs/plugin-react": "^5.0.0",
-    "vite": "^7.1.2",
-    "eslint": "^9.33.0"
-  }
-}
-```
+### Backend
+- **TR2.1:** Built with Node.js and Express.js
+- **TR2.2:** Must implement RESTful API design principles
+- **TR2.3:** Must handle CORS properly for frontend integration
+- **TR2.4:** Must implement proper error handling and logging
+- **TR2.5:** Must support environment-based configuration
 
-## 📋 Functional Requirements
+### Database
+- **TR3.1:** MongoDB with Mongoose ODM
+- **TR3.2:** Must implement proper schema validation
+- **TR3.3:** Must support database indexing for search performance
+- **TR3.4:** Must implement proper data relationships
 
-### 1. Landing Page Requirements
-
-#### Hero Section
-- **Primary Headline**: "High-End Photo Retouching for Photographers & Brands"
-- **Value Proposition**: One-sentence explanation of service benefits
-- **Visual Element**: Large background image/video slider with before & after samples
-- **CTAs**: 
-  - "Start Your Subscription" (primary)
-  - "Retouch a Single Image" (secondary)
-
-#### Service Overview Section
-- **Comparison Display**: Side-by-side Pay Per Image vs Subscription
-- **Pricing Cards**: Visual cards showing features and pricing
-- **Benefits Highlighting**: Clear value proposition for each service model
-
-#### How It Works Section
-- **Step 1**: Upload your photo(s)
-- **Step 2**: Our team retouches them
-- **Step 3**: Download your perfected images
-- **Visual Process**: Icons or illustrations for each step
-
-#### Portfolio Section
-- **Interactive Sliders**: Before/after comparison sliders
-- **High-Quality Samples**: Showcase of retouching quality
-- **Category Filtering**: Different types of retouching work
-
-#### Testimonials Section
-- **Client Quotes**: Happy photographers & brand testimonials
-- **Social Proof**: Trust indicators and credibility markers
-
-#### CTA Banner
-- **Prominent Placement**: Eye-catching section encouraging action
-- **Dual Options**: Subscribe or upload for single image
-
-### 2. Subscription Model & Pricing
-
-#### Pricing Table Requirements
-- **Tier Structure**:
-  - Basic: 20 images/month
-  - Professional: 50 images/month  
-  - Enterprise: Unlimited plan
-- **Cost Comparison**: Savings vs pay-per-image clearly shown
-- **Feature Lists**: What's included in each tier
-- **Popular Plan Highlighting**: Recommended tier emphasis
-
-#### Subscription Management Dashboard
-- **User Authentication**: Secure login/signup
-- **Usage Tracking**: Current month usage and limits
-- **Photo Upload**: Drag-and-drop interface
-- **Order History**: Past retouching requests
-- **Billing Management**: Payment methods and invoices
-- **Download Center**: Access to completed work
-
-### 3. Additional Pages
-
-#### Portfolio Page
-- **Full Gallery**: Complete showcase of work
-- **Before/After Comparisons**: Interactive comparison tools
-- **Category Organization**: Portraits, products, fashion, etc.
-- **High-Resolution Previews**: Quality demonstration
-
-#### About Us Page
-- **Company Story**: Background and experience
-- **Team Introduction**: Meet the retouchers
-- **Quality Process**: How we ensure excellence
-- **Trust Indicators**: Certifications, awards, experience
-
-#### Contact Page
-- **Contact Form**: Quick inquiry form
-- **Direct Contact**: Email and phone information
-- **WhatsApp Integration**: Instant chat button
-- **Response Time**: Expected reply timeframes
-
-#### FAQ Page
-- **Service Questions**: Delivery time, file formats, quality
-- **Subscription Details**: Usage limits, billing, cancellation
-- **Technical Support**: File requirements, upload issues
-- **Pricing Clarity**: Cost comparisons, hidden fees
-
-## 🎨 Design Requirements
-
-### Visual Design Standards
-- **Style**: High-end, minimal, professional
-- **Color Scheme**: Sophisticated palette (blues, grays, whites)
-- **Typography**: 
-  - Display: Playfair Display (headings)
-  - Body: Inter (readable, modern)
-- **Photography**: High-quality before/after samples
-- **Whitespace**: Generous spacing for luxury feel
-
-### User Experience Standards
-- **Loading Speed**: < 3 seconds initial load
-- **Interactions**: Smooth animations and transitions
-- **Navigation**: Intuitive, clear menu structure
-- **Mobile-First**: Perfect mobile experience
-- **Accessibility**: WCAG 2.1 AA compliance
-
-### Responsive Design Requirements
-- **Mobile**: 320px - 767px (priority experience)
-- **Tablet**: 768px - 1023px (touch-optimized)
-- **Desktop**: 1024px+ (full feature experience)
-- **Large Screens**: 1440px+ (optimized layout)
-
-## ⚡ Performance Requirements
-
-### Speed Optimization
-- **First Contentful Paint**: < 1.5 seconds
-- **Largest Contentful Paint**: < 2.5 seconds
-- **Cumulative Layout Shift**: < 0.1
-- **Time to Interactive**: < 3 seconds
-
-### Technical Optimization
-- **Image Optimization**: WebP format, responsive images
-- **Code Splitting**: Route-based lazy loading
-- **Caching Strategy**: Static assets and API responses
-- **CDN Usage**: Global content delivery
-
-## 🔐 Security Requirements
-
-### Data Protection
-- **SSL Certificate**: HTTPS everywhere
-- **User Data**: Secure handling of personal information
-- **Payment Security**: PCI compliance for billing
-- **File Security**: Secure upload and storage
+### Media Storage
+- **TR4.1:** Cloudinary integration for image storage
+- **TR4.2:** Organized folder structure:
+  - `wifmart/profile-images/` for profile pictures
+  - `wifmart/portfolio-images/` for portfolio samples
+- **TR4.3:** Proper file naming convention: `userId_timestamp.extension`
 
 ### Authentication
-- **User Accounts**: Secure login/registration
-- **Session Management**: Secure session handling
-- **Password Requirements**: Strong password enforcement
-- **Two-Factor Authentication**: Optional 2FA support
+- **TR5.1:** Google OAuth 2.0 integration
+- **TR5.2:** JWT token-based session management
+- **TR5.3:** Secure token storage and validation
+- **TR5.4:** Proper logout and token invalidation
 
-## 📊 Analytics & Monitoring
+## 📊 Database Schema Requirements
 
-### User Analytics
-- **Conversion Tracking**: Subscription sign-ups
-- **User Behavior**: Page interactions and flow
-- **Performance Metrics**: Site speed and errors
-- **A/B Testing**: CTA and layout optimization
+### Users Collection
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| _id | ObjectId | Auto-generated | MongoDB ID |
+| googleId | String | Required, Unique | Google account unique ID |
+| name | String | Required | Full name |
+| email | String | Required, Unique | User email |
+| bio | String | Optional | Short description |
+| phone | String | Optional | Contact number |
+| whatsapp | String | Optional | WhatsApp link |
+| portfolio_link | String | Optional | External portfolio URL |
+| profile_image | String | Optional | Cloudinary URL for profile picture |
+| created_at | Date | Auto-generated | Signup date |
 
-### Business Metrics
-- **Subscription Metrics**: Sign-ups, churn, upgrades
-- **Revenue Tracking**: Monthly recurring revenue
-- **Customer Satisfaction**: Feedback and ratings
-- **Usage Analytics**: Feature adoption and usage
+### Services Collection
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| _id | ObjectId | Auto-generated | MongoDB ID |
+| user_id | ObjectId | Required | Reference to user's _id |
+| skill | String | Required | Skill name |
+| category | String | Required | Category of service |
+| description | String | Required | Service details |
 
-## 🔄 Integration Requirements
+### Portfolios Collection
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| _id | ObjectId | Auto-generated | MongoDB ID |
+| user_id | ObjectId | Required | Reference to user's _id |
+| image_url | String | Required | Cloudinary URL for portfolio image |
+| link | String | Optional | External portfolio/social link |
 
-### Supabase Integration
-- **Authentication**: User registration and login
-- **Database**: User profiles, subscriptions, orders
-- **Storage**: Photo uploads and processed images
-- **Real-time**: Live updates for order status
+## 🌐 API Requirements
 
-### Third-Party Services
-- **Payment Processing**: Stripe or similar
-- **Email Service**: Transactional emails
-- **WhatsApp API**: Customer support chat
-- **Analytics**: Google Analytics or similar
+### Authentication Endpoints
+- `POST /api/auth/google` - Google OAuth sign-in
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/verify` - Token verification
+
+### User Management Endpoints
+- `GET /api/users/profile` - Get user profile
+- `PUT /api/users/profile` - Update user profile
+- `POST /api/users/upload-profile-image` - Upload profile image
+
+### Services Endpoints
+- `GET /api/services` - Get user's services
+- `POST /api/services` - Create new service
+- `PUT /api/services/:id` - Update service
+- `DELETE /api/services/:id` - Delete service
+
+### Portfolio Endpoints
+- `GET /api/portfolios` - Get user's portfolio
+- `POST /api/portfolios` - Upload portfolio image
+- `DELETE /api/portfolios/:id` - Delete portfolio item
+
+### Search Endpoints
+- `GET /api/search?skill=:skill` - Search by skill
+- `GET /api/search?name=:name` - Search by name
+
+## 📱 User Experience Requirements
+
+### Performance
+- **PER1:** Page load times must be under 3 seconds
+- **PER2:** Image uploads must complete within 10 seconds
+- **PER3:** Search results must appear within 2 seconds
+
+### Accessibility
+- **ACC1:** Platform must support keyboard navigation
+- **ACC2:** Color contrast must meet WCAG guidelines
+- **ACC3:** Alt text must be provided for all images
+
+### Security
+- **SEC1:** All user inputs must be validated and sanitized
+- **SEC2:** JWT tokens must have appropriate expiration times
+- **SEC3:** File uploads must be validated for type and size
+- **SEC4:** Sensitive data must be properly encrypted
+
+## 🧪 Testing Requirements
+
+### Unit Testing
+- **TEST1:** All utility functions must have unit tests
+- **TEST2:** API endpoints must have unit tests for success and error cases
+
+### Integration Testing
+- **TEST3:** Authentication flow must be integration tested
+- **TEST4:** Database operations must be integration tested
+
+### User Acceptance Testing
+- **TEST5:** Complete user workflows must be tested
+- **TEST6:** Cross-browser compatibility must be verified
+
+## 📈 Future Enhancement Requirements
+
+### Planned Features
+- User ratings and reviews system
+- Location-based search functionality
+- Payment integration with Stripe
+- In-app messaging system
+- Advanced search filters
+- Redis caching for performance optimization
 
 ## 🚀 Deployment Requirements
 
-### Development Environment
-- **Local Development**: Vite dev server
-- **Environment Variables**: Secure configuration
-- **Version Control**: Git workflow
-- **Code Quality**: ESLint and Prettier
-
-### Production Deployment
-- **Hosting**: Vercel, Netlify, or similar
-- **Domain**: Custom domain with SSL
-- **Environment**: Production environment variables
-- **Monitoring**: Error tracking and performance monitoring
-
-## ✅ Acceptance Criteria
-
-### Functionality Tests
-- [ ] All pages load correctly on all devices
-- [ ] Before/after sliders work smoothly
-- [ ] Contact forms submit successfully
-- [ ] Subscription flows work end-to-end
-- [ ] File uploads function properly
-
-### Performance Tests
-- [ ] PageSpeed Insights score > 90
-- [ ] Mobile usability passes Google test
-- [ ] All images optimized and loading quickly
-- [ ] Animations perform smoothly at 60fps
-
-### User Experience Tests
-- [ ] Navigation is intuitive and clear
-- [ ] CTAs are prominent and effective
-- [ ] Mobile experience is touch-friendly
-- [ ] Content is readable and engaging
-- [ ] Loading states provide clear feedback
+- **DEP1:** Platform must be deployable to cloud services (Vercel, Heroku, etc.)
+- **DEP2:** Environment variables must be properly configured
+- **DEP3:** Database backups must be automated
+- **DEP4:** CDN integration for static assets
+- **DEP5:** SSL certificates must be configured
 
 ---
 
-*This requirements document serves as the blueprint for developing the EliteRetoucher website. All features should be implemented according to these specifications to ensure a professional, high-performing website that meets business objectives.*
+*This requirements document serves as the foundation for Wifmart development and should be updated as new features are planned and implemented.*
