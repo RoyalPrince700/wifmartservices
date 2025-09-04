@@ -21,6 +21,7 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const { user, token, loading } = useContext(AuthContext);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [hasTyped, setHasTyped] = useState(false);
   const bellRef = useRef(null);
   const navigate = useNavigate();
 
@@ -70,6 +71,15 @@ const Navbar = () => {
     return () => {
       socket.off('new-notification', handleNewNotification);
     };
+  };
+
+  // Handle mobile search input focus - navigate immediately
+  const handleMobileSearchFocus = (e) => {
+    if (!hasTyped) {
+      setHasTyped(true);
+      // Navigate immediately when user clicks on mobile search bar
+      navigate(`/search-input`);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -216,7 +226,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile: Notification Bell or Login Button */}
+            {/* Mobile: Notification Bell or Search Input */}
             <div className="md:hidden flex items-center">
               {token ? (
                 <div className="relative" ref={bellRef}>
@@ -240,17 +250,20 @@ const Navbar = () => {
                   />
                 </div>
               ) : (
-                <Link
-                  to="/signin"
-                  className="group relative inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
-                >
-                  {/* Animated background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  <span className="relative">Get Started</span>
-                  <HiArrowRight className="relative w-4 h-4 ml-2 group-hover:translate-x-1 transition-all duration-300" />
-                  {/* Ripple effect */}
-                  <div className="absolute inset-0 rounded-lg bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
-                </Link>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <HiSearch className="h-5 w-5 text-gray-500 group-focus-within:text-blue-600 transition-colors duration-300" />
+                  </div>
+                  <input
+                    type="text"
+                    onFocus={handleMobileSearchFocus}
+                    className="block w-40 sm:w-48 pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
+                    placeholder="Search services..."
+                    aria-label="Search for services"
+                  />
+                  {/* Animated border effect */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-0 group-focus-within:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
+                </div>
               )}
             </div>
           </div>
@@ -279,6 +292,17 @@ const Navbar = () => {
                 >
                   <HiUser className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                   <span className="ml-3 group-hover:font-semibold">Edit Profile</span>
+                </Link>
+              )}
+
+              {!token && (
+                <Link
+                  to="/signin"
+                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 block pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium flex items-center transition-all duration-300 transform hover:translate-x-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <HiArrowRight className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="ml-3 group-hover:font-semibold">Get Started</span>
                 </Link>
               )}
             </div>

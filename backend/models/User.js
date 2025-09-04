@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
 
+  // ✅ Rating System
+  rating: { type: Number, default: 3.5, min: 1, max: 5 }, // Default rating for new users
+  totalReviews: { type: Number, default: 0 }, // Track number of reviews received
+
   // ✅ Profile & Admin
   profile_completion: { type: Number, default: 0 },
   isAdmin: { type: Boolean, default: false },

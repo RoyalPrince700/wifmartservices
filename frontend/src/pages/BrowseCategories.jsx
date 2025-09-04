@@ -1,9 +1,9 @@
-// frontend/src/pages/SearchResults.jsx
+// frontend/src/pages/BrowseCategories.jsx
 import { useState, useEffect } from 'react';
-import SearchResultsMobile from './SearchResultsMobile';
-import SearchResultsDesktop from './SearchResultsDesktop';
+import BrowseCategoriesMobile from './BrowseCategoriesMobile';
+import BrowseCategoriesDesktop from './BrowseCategoriesDesktop';
 
-const SearchResults = () => {
+const BrowseCategories = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const SearchResults = () => {
   }, []);
 
   // Render appropriate component based on screen size
-  return isMobile ? <SearchResultsMobile /> : <SearchResultsDesktop />;
+  return isMobile ? <BrowseCategoriesMobile /> : <BrowseCategoriesDesktop />;
 };
 
-export default SearchResults;
+export default BrowseCategories;

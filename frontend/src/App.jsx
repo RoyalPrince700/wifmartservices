@@ -16,6 +16,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import BadgeVerificationPage from './pages/BadgeVerificationPage';
 import ChatPage from './pages/ChatPage';
 import NotificationPage from './pages/NotificationPage';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import ContactUs from './pages/ContactUs';
+import HelpCenter from './pages/HelpCenter';
+import BrowseCategories from './pages/BrowseCategories';
 
 // Helper to determine if footer should be hidden
 const useHideFooterOn = (paths) => {
@@ -45,7 +50,14 @@ const App = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/search-input" element={<SearchInput />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/browse-categories" element={<BrowseCategories />} />
         <Route path="/profile/:id" element={<ProfilePage />} />
+
+        {/* Public Information Pages */}
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/help" element={<HelpCenter />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>

@@ -3,36 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { HiSearch, HiArrowRight, HiSparkles, HiCode, HiPencilAlt, HiBriefcase, HiLocationMarker, HiOfficeBuilding, HiPhotograph, HiPencil, HiDesktopComputer, HiChip, HiX } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
-// Custom Typewriter Hook
-const useTypewriter = (text, speed = 50, delay = 0) => {
-  const [displayText, setDisplayText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, speed);
-
-      return () => clearTimeout(timeout);
-    } else {
-      setIsComplete(true);
-    }
-  }, [currentIndex, text, speed]);
-
-  useEffect(() => {
-    const delayTimeout = setTimeout(() => {
-      setCurrentIndex(0);
-      setDisplayText('');
-    }, delay);
-
-    return () => clearTimeout(delayTimeout);
-  }, [delay]);
-
-  return { displayText, isComplete };
-};
 
 const Hero = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,10 +15,6 @@ const Hero = () => {
   const searchInputRef = useRef(null);
   const suggestionsRef = useRef(null);
 
-  // Motion copy
-  const subHeadingText = "In Minutes";
-  const { displayText: subHeadingDisplay, isComplete: subHeadingComplete } = useTypewriter(subHeadingText, 100, 600);
-  const valuePropOneLiner = "Need a bag vendor in Lagos? Wedding planner Abuja? Graphic designer for your business? Find verified professionals instantly.";
 
   useEffect(() => {
     setIsLoaded(true);
@@ -136,18 +102,19 @@ const Hero = () => {
     return filtered;
   };
 
+  // Handle input focus - navigate immediately
+  const handleFocus = (e) => {
+    if (!hasTyped) {
+      setHasTyped(true);
+      // Navigate immediately when user clicks on search bar
+      navigate(`/search-input`);
+    }
+  };
+
   // Handle input change with suggestions
   const handleInputChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
-
-    if (!hasTyped && value.length > 0) {
-      setHasTyped(true);
-      // Auto-navigate to search-input page on first character
-      setTimeout(() => {
-        navigate(`/search-input?q=${encodeURIComponent(value)}`);
-      }, 100);
-    }
 
     if (value.length > 0) {
       const suggestions = filterSuggestions(value);
@@ -200,71 +167,61 @@ const Hero = () => {
   };
 
   const quickSearches = [
-    { label: 'Bag Vendors', icon: HiPencilAlt, color: 'text-blue-500' },
-    { label: 'Event Planners', icon: HiCode, color: 'text-blue-600' },
+    { label: 'Website Development', icon: HiDesktopComputer, color: 'text-blue-500' },
+    { label: 'Bag Vendors', icon: HiPencilAlt, color: 'text-blue-600' },
     { label: 'Graphic Design', icon: HiBriefcase, color: 'text-blue-700' },
   ];
 
   return (
-    <div className="relative bg-gradient-to-br from-slate-50 via-blue-50/30 to-white min-h-screen overflow-hidden">
+    <div className="relative bg-white min-h-screen overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating geometric shapes */}
-        <div className={`absolute top-20 left-10 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl transition-all duration-[8000ms] ease-in-out ${isLoaded ? 'animate-float-1' : ''}`}></div>
-        <div className={`absolute bottom-20 right-10 w-40 h-40 bg-blue-100/30 rounded-full blur-3xl transition-all duration-[10000ms] ease-in-out ${isLoaded ? 'animate-float-2' : ''}`}></div>
+        <div className={`absolute top-20 left-10 w-32 h-32 bg-blue-100/30 rounded-full blur-3xl transition-all duration-[8000ms] ease-in-out ${isLoaded ? 'animate-float-1' : ''}`}></div>
+        <div className={`absolute bottom-20 right-10 w-40 h-40 bg-blue-200/25 rounded-full blur-3xl transition-all duration-[10000ms] ease-in-out ${isLoaded ? 'animate-float-2' : ''}`}></div>
         <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-50/20 to-transparent rounded-full transition-all duration-[12000ms] ease-in-out ${isLoaded ? 'animate-float-3' : ''}`}></div>
 
         {/* Additional floating elements */}
-        <div className={`absolute top-32 right-20 w-4 h-4 bg-blue-400/20 rounded-full transition-all duration-[6000ms] ease-in-out ${isLoaded ? 'animate-ping-slow' : ''}`}></div>
-        <div className={`absolute bottom-40 left-20 w-6 h-6 bg-purple-400/20 rotate-45 transition-all duration-[8000ms] ease-in-out ${isLoaded ? 'animate-float-4' : ''}`}></div>
-        <div className={`absolute top-60 left-32 w-3 h-3 bg-cyan-400/20 rounded-full transition-all duration-[7000ms] ease-in-out ${isLoaded ? 'animate-bounce-slow' : ''}`}></div>
+        <div className={`absolute top-32 right-20 w-4 h-4 bg-blue-400/40 rounded-full transition-all duration-[6000ms] ease-in-out ${isLoaded ? 'animate-ping-slow' : ''}`}></div>
+        <div className={`absolute bottom-40 left-20 w-6 h-6 bg-indigo-400/30 rotate-45 transition-all duration-[8000ms] ease-in-out ${isLoaded ? 'animate-float-4' : ''}`}></div>
+        <div className={`absolute top-60 left-32 w-3 h-3 bg-cyan-400/30 rounded-full transition-all duration-[7000ms] ease-in-out ${isLoaded ? 'animate-bounce-slow' : ''}`}></div>
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
         <div className="text-center">
-          {/* Urgency Badge */}
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-200/50 backdrop-blur-sm mb-8 animate-pulse">
-            <HiSparkles className="w-4 h-4 text-red-500 mr-2" />
-            <span className="text-sm font-semibold text-red-700">⚡ Limited Time: Get Your First Client Free</span>
-          </div>
 
-          {/* Main Heading - Static with typed subheading */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-4 tracking-tight">
-            Get Quality Services
-            <span className="block bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-              {subHeadingDisplay}
-              <span className={`inline-block w-1 h-8 bg-blue-600 ml-1 align-middle animate-pulse ${subHeadingComplete ? 'opacity-0' : 'opacity-100'}`}></span>
-            </span>
-              </h1>
+          {/* Main Heading */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 tracking-tight">
+            Expert services at your fingertips
+          </h1>
 
-          {/* Concise value proposition */}
-          <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto mb-6 leading-relaxed">
-            {valuePropOneLiner}
-          </p>
 
           {/* Creative Search Section */}
           <div className="max-w-3xl mx-auto">
             {/* Main Search Container */}
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-5 mb-4 transform hover:shadow-2xl transition-all duration-300">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-6 mb-4 transform hover:shadow-2xl transition-all duration-300">
               <form onSubmit={handleSearch} className="space-y-4">
                 {/* Search Input - Creative Design with Animation */}
                 <div className="relative group" ref={searchInputRef}>
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <HiSearch className="h-6 w-6 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300 group-hover:scale-110 transform transition-transform duration-200" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                    <div className="bg-blue-600 p-2 rounded-lg">
+                      <HiSearch className="h-4 w-4 text-white" />
                     </div>
+                  </div>
                     <input
                       type="text"
                       name="query"
                       value={searchQuery}
                       onChange={handleInputChange}
+                      onFocus={handleFocus}
                       onKeyDown={handleKeyDown}
-                      className="block w-full pl-16 pr-6 py-5 text-lg border-0 bg-gray-50 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white hover:bg-gray-100 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-[1.02] focus:scale-[1.02]"
-                      placeholder="Try: 'Bag vendor in Lagos' or 'Wedding planner Abuja' or 'Logo design'"
+                      className="block w-full pl-20 pr-8 py-5 text-lg border-2 border-gray-200 bg-white rounded-full text-gray-900 placeholder-gray-600 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 focus:bg-white hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] focus:scale-[1.02] font-medium"
+                      placeholder="Search for services, vendors, or freelancers..."
                       aria-label="Search for vendors, freelancers, projects, or specific professionals"
                       autoComplete="off"
                     />
                   {/* Animated border effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-0 group-focus-within:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 opacity-0 group-focus-within:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
 
                   {/* Search Suggestions Dropdown */}
                   {showSuggestions && filteredSuggestions.length > 0 && (
@@ -334,8 +291,8 @@ const Hero = () => {
                 </div>
 
                 {/* Popular Nigerian Services */}
-                <div className="flex flex-wrap justify-center gap-2">
-                  <span className="text-sm text-gray-500 font-medium">Popular:</span>
+                <div className="flex flex-wrap justify-center items-center gap-3">
+                  <span className="text-sm text-gray-500 font-medium whitespace-nowrap">Popular:</span>
                   {quickSearches.map((item, index) => (
                     <button
                       key={index}
@@ -348,17 +305,17 @@ const Hero = () => {
                       {item.label}
                     </button>
                   ))}
-                  </div>
+                </div>
 
                 {/* Search Button - Creative Design */}
-                <div className="flex justify-center pt-1">
+                <div className="flex justify-center pt-2">
                   <button
                     type="submit"
-                    className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 hover:-translate-y-2 overflow-hidden"
+                    className="group relative inline-flex items-center px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-1 overflow-hidden text-lg"
                   >
                     {/* Animated background effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                    <span className="relative mr-3 text-lg">Find Your Match</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    <span className="relative mr-3">Search</span>
                     <HiArrowRight className="relative w-5 h-5 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" />
                     {/* Ripple effect */}
                     <div className="absolute inset-0 rounded-2xl bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
@@ -367,34 +324,26 @@ const Hero = () => {
                 </form>
               </div>
 
-            {/* Dual CTA Section */}
-            <div className="mt-8 space-y-4">
-              {/* For Service Providers */}
-              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-200/50">
-                <h3 className="text-lg font-semibold text-green-800 mb-2">🎯 Want More Clients?</h3>
-                <p className="text-green-700 text-sm mb-4">Set up your professional profile in 5 minutes and start getting clients today.</p>
-                <button className="group relative bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 overflow-hidden">
-                  {/* Animated background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-                  <span className="relative flex items-center">
-                    Start Getting Clients
-                    <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">🚀</span>
-                  </span>
-                  {/* Success particles effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute top-1 right-2 w-1 h-1 bg-white rounded-full animate-ping"></div>
-                    <div className="absolute top-2 right-4 w-1 h-1 bg-white rounded-full animate-ping delay-100"></div>
-                  </div>
-                </button>
+              {/* Trust Indicators */}
+              <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-gray-900">500+</div>
+                  <div className="text-sm text-gray-600">Verified Vendors</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-gray-900">98%</div>
+                  <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-gray-900">2,000+</div>
+                  <div className="text-sm text-gray-600">Projects Completed</div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-gray-900">4.8★</div>
+                  <div className="text-sm text-gray-600">Average Rating</div>
+                </div>
               </div>
 
-              {/* Trust & Stats */}
-              <div className="text-center">
-                <p className="text-gray-500 text-sm font-medium">
-                  Join 500+ vendors, freelancers & businesses • 98% satisfaction rate • 2,000+ projects completed
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -1,60 +1,151 @@
-import { HiStar, HiCheckCircle } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HiStar, HiLocationMarker, HiCheckCircle, HiArrowRight } from 'react-icons/hi';
+import { getFeaturedProviders } from '../services/api';
 
 
 
 const FeaturedProviders = () => {
-  const navigate = useNavigate();
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const providers = [
-    {
-      id: 1,
+  useEffect(() => {
+    const fetchFeaturedProviders = async () => {
+      try {
+        setLoading(true);
+        const data = await getFeaturedProviders();
+        setProviders(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch featured providers:', err);
+        setError('Failed to load featured providers');
+        // Fallback to dummy data if API fails
+        setProviders([
+          {
+            _id: 'fallback-1',
       name: "Sarah Johnson",
-      title: "Senior Web Developer",
-      rating: 4.9,
-      reviews: 128,
-      rate: "$45/hr",
-      image: null, // Will use fallback avatar
-      skills: ["React", "Node.js", "MongoDB"],
-      verified: true
+            location_state: "Lagos, Nigeria",
+            profile_image: null,
+      skills: ["Website Development", "React", "Node.js"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Senior Website Developer specializing in modern web technologies'
     },
     {
-      id: 2,
+            _id: 'fallback-2',
       name: "Michael Chen",
-      title: "UI/UX Designer",
-      rating: 4.8,
-      reviews: 96,
-      rate: "$50/hr",
-      image: null, // Will use fallback avatar
-      skills: ["Figma", "UI Design", "Prototyping"],
-      verified: true
+            location_state: "Abuja, Nigeria",
+            profile_image: null,
+      skills: ["WordPress", "Web Design", "E-commerce"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Full-stack developer with expertise in WordPress and e-commerce solutions'
     },
     {
-      id: 3,
+            _id: 'fallback-3',
       name: "Emily Rodriguez",
-      title: "Content Writer",
-      rating: 4.7,
-      reviews: 142,
-      rate: "$35/hr",
-      image: null, // Will use fallback avatar
-      skills: ["SEO", "Blogging", "Copywriting"],
-      verified: true
+            location_state: "Port Harcourt, Nigeria",
+            profile_image: null,
+      skills: ["Figma", "UI Design", "Prototyping"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Creative UI/UX Designer specializing in user-centered design'
     },
     {
-      id: 4,
+            _id: 'fallback-4',
       name: "David Kim",
-      title: "Digital Marketing Specialist",
-      rating: 4.9,
-      reviews: 87,
-      rate: "$55/hr",
-      image: null, // Will use fallback avatar
-      skills: ["SEO", "Google Ads", "Social Media"],
-      verified: true
+            location_state: "Kano, Nigeria",
+            profile_image: null,
+      skills: ["Mobile Development", "React Native", "Flutter"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Mobile app developer with expertise in cross-platform solutions'
+    },
+    {
+            _id: 'fallback-5',
+      name: "James Wilson",
+            location_state: "Lagos, Nigeria",
+            profile_image: null,
+      skills: ["Graphic Design", "Adobe Creative Suite", "Branding"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Professional graphic designer with 8+ years of branding experience'
+    },
+    {
+            _id: 'fallback-6',
+      name: "Maria Garcia",
+            location_state: "Abuja, Nigeria",
+            profile_image: null,
+      skills: ["Digital Marketing", "SEO", "Social Media"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Digital marketing specialist driving growth through strategic campaigns'
+    },
+    {
+            _id: 'fallback-7',
+      name: "Robert Taylor",
+            location_state: "Lagos, Nigeria",
+            profile_image: null,
+      skills: ["Content Writing", "Copywriting", "Blog Writing"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Experienced content writer specializing in engaging copy and blog content'
+    },
+    {
+            _id: 'fallback-8',
+      name: "Lisa Anderson",
+            location_state: "Port Harcourt, Nigeria",
+            profile_image: null,
+      skills: ["Photography", "Photo Editing", "Event Photography"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Professional photographer capturing memorable moments and events'
+    },
+    {
+            _id: 'fallback-9',
+      name: "Kevin Brown",
+            location_state: "Kano, Nigeria",
+            profile_image: null,
+      skills: ["Video Editing", "Motion Graphics", "After Effects"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Creative video editor specializing in motion graphics and visual effects'
+    },
+    {
+            _id: 'fallback-10',
+      name: "Anna Martinez",
+            location_state: "Ibadan, Nigeria",
+            profile_image: null,
+      skills: ["Business Consulting", "Strategy Planning", "Market Research"],
+            isVerifiedBadge: true,
+            verification_status: 'Approved',
+            experience_pitch: 'Strategic business consultant helping companies grow and succeed'
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProviders();
+  }, []);
+
+  // Format location (similar to SearchResultCard)
+  const formatLocation = (provider) => {
+    if (provider.location_state && typeof provider.location_state === 'string' && provider.location_state.trim()) {
+      return provider.location_state.trim();
     }
-  ];
+    return 'Location not specified';
+  };
+
+  // Check verification status
+  const isVerified = (provider) => {
+    return provider?.isVerifiedBadge === true || provider?.verification_status?.toLowerCase() === "approved";
+  };
 
   const handleProviderClick = (providerId) => {
-    navigate(`/provider/${providerId}`);
+    // Navigation handled by Link component
   };
 
   return (
@@ -67,67 +158,167 @@ const FeaturedProviders = () => {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {providers.map((provider) => (
-            <div
-              key={provider.id}
-              onClick={() => handleProviderClick(provider.id)}
-              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg border border-gray-100"
-            >
-              <div className="p-6">
-                <div>
-                  <div className="flex items-center">
-                    <h3 className="text-lg font-medium text-gray-900">{provider.name}</h3>
-                    {provider.verified && (
-                      <HiCheckCircle className="h-5 w-5 text-blue-500 ml-1" />
+        <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            // Loading skeletons
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                <div className="p-5">
+                  <div className="flex p-5 pb-4 gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                  </div>
+                  <div className="px-5 pb-4">
+                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+                  </div>
+                  <div className="px-5 pb-5">
+                    <div className="flex flex-wrap gap-2">
+                      <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                      <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                      <div className="h-6 bg-gray-200 rounded-full w-18"></div>
+                    </div>
+                </div>
+                  <div className="px-5 pt-2 pb-5">
+                    <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : error ? (
+            <div className="col-span-full text-center py-12">
+              <div className="text-red-500 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load providers</h3>
+              <p className="text-gray-500">Please try refreshing the page</p>
+            </div>
+          ) : (
+            providers.map((provider) => {
+              const {
+                _id,
+                name = 'Unknown',
+                location_state,
+                hourlyRate,
+                rating,
+                skills = [],
+                profile_image,
+                isVerifiedBadge,
+                verification_status,
+                experience_pitch = '',
+                bio = '',
+              } = provider;
+
+              // Derive title from first skill or provide default
+              const displayTitle = skills.length > 0 ? skills[0] : 'Service Provider';
+              const displayLocation = formatLocation(provider);
+              const profileImageSrc = profile_image || 'https://via.placeholder.com/150?text=Profile';
+              const verified = isVerified(provider);
+
+              return (
+                <Link key={_id} to={`/profile/${_id}`} className="block">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+
+                    {/* Header: Image & Name */}
+                    <div className="flex p-5 pb-4 gap-4">
+                      <div className="flex-shrink-0">
+                        <img
+                          src={profileImageSrc}
+                          alt={name}
+                          className="h-16 w-16 rounded-full object-cover ring-2 ring-gray-100"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0 mr-2">
+                            <h3 className="text-lg font-bold text-gray-900 truncate">{name}</h3>
+                            <p className="text-sm font-medium text-gray-500 truncate">{displayTitle}</p>
+                          </div>
+
+                          {/* Verified Badge */}
+                          {verified && (
+                            <HiCheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                          )}
+                        </div>
+
+                        {/* Location */}
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-gray-600">
+                          <span className="flex items-center">
+                            <HiLocationMarker className="h-4 w-4 mr-1" />
+                            {displayLocation}
+                          </span>
+                </div>
+
+                        {/* Rating */}
+                        <div className="flex items-center mt-1">
+                          <HiStar className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="ml-1 text-sm text-gray-700">
+                            {(rating || 3.5).toFixed(1)}{' '}
+                            <span className="text-gray-500">(reviews)</span>
+                          </span>
+                        </div>
+                      </div>
+                </div>
+
+                    {/* Bio/Experience Preview */}
+                    {(bio || experience_pitch) && (
+                      <div className="px-5 pb-4">
+                        <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                          {experience_pitch || bio}
+                        </p>
+                      </div>
                     )}
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">{provider.title}</p>
-                </div>
 
-                <div className="mt-4 flex items-center">
-                  <div className="flex items-center">
-                    <HiStar className="h-5 w-5 text-yellow-400" />
-                    <span className="ml-1 text-sm font-medium text-gray-900">{provider.rating}</span>
-                  </div>
-                  <span className="mx-2 text-gray-300">•</span>
-                  <span className="text-sm text-gray-500">{provider.reviews} reviews</span>
-                </div>
-
-                <div className="mt-4">
-                  <span className="text-lg font-bold text-gray-900">{provider.rate}</span>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {provider.skills.map((skill, index) => (
+                    {/* Skills */}
+                    <div className="px-5 pb-5">
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {skills.slice(0, 4).map((skill, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
                     >
                       {skill}
                     </span>
                   ))}
+                        {skills.length > 4 && (
+                          <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                            +{skills.length - 4} more
+                          </span>
+                        )}
+                      </div>
                 </div>
 
-                <button className="mt-6 w-full group relative bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 hover:-translate-y-1 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  <span className="relative">View Profile</span>
-                  <div className="absolute inset-0 rounded-lg bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
+                    {/* CTA Button */}
+                    <div className="px-5 pt-2 pb-5">
+                      <button className="w-full text-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                        View Full Profile →
                 </button>
               </div>
             </div>
-          ))}
+                </Link>
+              );
+            })
+          )}
         </div>
 
         <div className="mt-10 text-center">
-          <button
-            onClick={() => navigate('/search')}
+          <Link
+            to="/browse-categories"
             className="group relative inline-flex items-center px-8 py-4 border-2 border-gray-300 shadow-lg text-base font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
             <span className="relative">Browse All Providers</span>
+            <HiArrowRight className="relative ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
             <div className="absolute inset-0 rounded-xl bg-gray-400/10 scale-0 group-active:scale-100 transition-transform duration-150"></div>
-          </button>
+          </Link>
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { DashboardCard, StatusBadge } from './UIComponents';
+import { HiCheckCircle } from 'react-icons/hi';
 
 const VerificationSection = ({ 
   user, 
@@ -41,8 +42,9 @@ const VerificationSection = ({
               </div>
             </div>
             <div className="bg-green-50 p-3 rounded-lg">
-              <p className="text-sm text-green-800">
-                ✅ You have a verified badge! Your profile is trusted and gets higher visibility.
+              <p className="text-sm text-green-800 flex items-center">
+                <HiCheckCircle className="h-4 w-4 mr-2" />
+                You have a verified badge! Your profile is trusted and gets higher visibility.
               </p>
             </div>
           </div>
@@ -210,8 +212,9 @@ const VerificationSection = ({
         {user?.isVerifiedBadge && (
           <div className="text-center py-4">
             <StatusBadge status="Verified" />
-            <p className="text-sm text-green-700 mt-2">
-              ✅ You have a verified badge via payment. No manual approval needed.
+            <p className="text-sm text-green-700 mt-2 flex items-center justify-center">
+              <HiCheckCircle className="h-4 w-4 mr-2" />
+              You have a verified badge via payment. No manual approval needed.
             </p>
           </div>
         )}

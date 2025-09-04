@@ -1,6 +1,7 @@
 // controllers/hireController.js
 import Service from '../models/Service.js';
 import User from '../models/User.js';
+import Review from '../models/Review.js';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload.js';
 
 export const sendHireRequest = async (req, res) => {
@@ -182,5 +183,128 @@ export const updateHireStatus = async (req, res) => {
   } catch (error) {
     console.error('Error updating hire status:', error);
     res.status(500).json({ message: 'Failed to update status' });
+  }
+};
+
+/**
+ * POST /api/hire/:serviceId/review
+ * Leave a review for a completed service
+ */
+export const leaveReview = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const { rating, comment } = req.body;
+    const clientId = req.user._id;
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
+    // Find the service
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    // Check if user is the client for this service
+    if (service.client_id.toString() !== clientId.toString()) {
+      return res.status(403).json({ message: 'Only the client can leave a review' });
+    }
+
+    // Check if service is completed
+    if (service.status !== 'completed') {
+      return res.status(400).json({ message: 'Can only review completed services' });
+    }
+
+    // Check if already reviewed
+    if (service.reviewed) {
+      return res.status(400).json({ message: 'Service already reviewed' });
+    }
+
+    // Create the review
+    const review = new Review({
+      service_id: serviceId,
+      client_id: clientId,
+      provider_id: service.provider_id,
+      rating: Number(rating),
+      comment: comment || ''
+    });
+
+    await review.save();
+
+    // Mark service as reviewed
+    service.reviewed = true;
+    await service.save();
+
+    // Update provider's rating and total reviews
+    const provider = await User.findById(service.provider_id);
+    if (provider) {
+      // Get all reviews for this provider
+      const allReviews = await Review.find({ provider_id: service.provider_id });
+
+      // Calculate new average rating
+      const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+      const newAverageRating = totalRating / allReviews.length;
+
+      // Update provider
+      provider.rating = Math.round(newAverageRating * 10) / 10; // Round to 1 decimal place
+      provider.totalReviews = allReviews.length;
+      await provider.save();
+    }
+
+    res.status(201).json({
+      message: 'Review submitted successfully',
+      review: {
+        id: review._id,
+        rating: review.rating,
+        comment: review.comment,
+        created_at: review.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Error leaving review:', error);
+    res.status(500).json({ message: 'Failed to submit review' });
+  }
+};
+
+/**
+ * GET /api/hire/:serviceId/review
+ * Get review for a service
+ */
+export const getReview = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+
+    const review = await Review.findOne({ service_id: serviceId })
+      .populate('client_id', 'name profile_image')
+      .populate('provider_id', 'name profile_image');
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    res.status(200).json({
+      review: {
+        id: review._id,
+        service_id: review.service_id,
+        client: {
+          id: review.client_id._id,
+          name: review.client_id.name,
+          profile_image: review.client_id.profile_image
+        },
+        provider: {
+          id: review.provider_id._id,
+          name: review.provider_id.name,
+          profile_image: review.provider_id.profile_image
+        },
+        rating: review.rating,
+        comment: review.comment,
+        created_at: review.created_at
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching review:', error);
+    res.status(500).json({ message: 'Failed to fetch review' });
   }
 };

@@ -50,14 +50,34 @@ export const updateProfile = async (formData) => {
   }
 };
 
-export const searchProviders = async (query = '') => {
+export const searchProviders = async (query = '', category = '') => {
   try {
-    const response = await api.get('/api/search', {
-      params: { q: query },
-    });
+    const params = {};
+    if (query) params.q = query;
+    if (category) params.category = category;
+
+    const response = await api.get('/api/search', { params });
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Search failed';
+  }
+};
+
+export const getFeaturedProviders = async () => {
+  try {
+    const response = await api.get('/api/search/featured');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to fetch featured providers';
+  }
+};
+
+export const getCategoryCounts = async () => {
+  try {
+    const response = await api.get('/api/search/categories/counts');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to fetch category counts';
   }
 };
 

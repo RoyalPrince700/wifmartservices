@@ -1,10 +1,12 @@
+import { HiCheckCircle } from 'react-icons/hi';
+
 // Status badge component
 export const StatusBadge = ({ status, reason }) => {
   const getStatusConfig = (status) => {
     switch(status) {
       case 'Verified':
       case 'Approved':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: '✅' };
+        return { bg: 'bg-green-100', text: 'text-green-800', icon: <HiCheckCircle className="h-4 w-4" /> };
       case 'Pending':
         return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: '⏳' };
       case 'Rejected':
@@ -15,9 +17,9 @@ export const StatusBadge = ({ status, reason }) => {
         return { bg: 'bg-gray-100', text: 'text-gray-800', icon: '' };
     }
   };
-  
+
   const config = getStatusConfig(status);
-  
+
   return (
     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
       <span className="mr-1">{config.icon}</span>

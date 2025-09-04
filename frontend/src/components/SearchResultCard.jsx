@@ -1,13 +1,18 @@
 
 import { Link } from 'react-router-dom';
-import { HiStar, HiLocationMarker, HiCurrencyDollar } from 'react-icons/hi';
+import { HiStar, HiLocationMarker, HiCurrencyDollar, HiCheckCircle } from 'react-icons/hi';
 
 const SearchResultCard = ({ provider }) => {
   const {
     _id,
     name = 'Unknown',
-    title = 'No title provided',
-    location = 'Not specified',
+    location,
+    location_state, // ✅ This is the main location field from backend
+    city,
+    state,
+    country,
+    address,
+    physical_address,
     hourlyRate = 0,
     rating = 0,
     skills = [],
@@ -16,13 +21,89 @@ const SearchResultCard = ({ provider }) => {
     isVerified,
     isVerifiedBadge,
     bio = '',
+    experience_pitch = '',
   } = provider;
 
-  // ✅ Debug log to inspect what the backend sends
-  console.log("👑 Provider Verified:", name, {
-    isVerifiedBadge,
-    isVerified,
-    verification_status: provider.verification_status,
+  // ✅ Derive title from first skill or provide default
+  const displayTitle = skills.length > 0 ? skills[0] : 'Service Provider';
+
+  // ✅ Debug log to inspect location data
+  console.log("📍 Provider Location Debug:", name, {
+    rawLocation: provider.location,
+    locationState: location_state,
+    locationType: typeof provider.location,
+    locationString: location,
+    individualFields: { city, state, country, address, physical_address },
+    providerKeys: Object.keys(provider)
+  });
+
+
+  // ✅ Format location properly
+  const formatLocation = () => {
+    // ✅ Priority 1: location_state (main backend field)
+    if (location_state && typeof location_state === 'string' && location_state.trim()) {
+      return location_state.trim();
+    }
+
+    // ✅ Priority 2: Main location field
+    if (location) {
+      if (typeof location === 'string' && location.trim()) {
+        return location.trim();
+      }
+
+      // If location is an object
+      if (typeof location === 'object') {
+        const { city: locCity, state: locState, country: locCountry, address: locAddress } = location;
+
+        if (locCity && locState && locCountry) {
+          return `${locCity}, ${locState}, ${locCountry}`;
+        } else if (locCity && locCountry) {
+          return `${locCity}, ${locCountry}`;
+        } else if (locState && locCountry) {
+          return `${locState}, ${locCountry}`;
+        } else if (locCity && locState) {
+          return `${locCity}, ${locState}`;
+        } else if (locCity) {
+          return locCity;
+        } else if (locState) {
+          return locState;
+        } else if (locCountry) {
+          return locCountry;
+        } else if (locAddress) {
+          return locAddress;
+        }
+      }
+    }
+
+    // ✅ Priority 3: Individual location fields
+    if (city && state && country) {
+      return `${city}, ${state}, ${country}`;
+    } else if (city && country) {
+      return `${city}, ${country}`;
+    } else if (state && country) {
+      return `${state}, ${country}`;
+    } else if (city && state) {
+      return `${city}, ${state}`;
+    } else if (city) {
+      return city;
+    } else if (state) {
+      return state;
+    } else if (country) {
+      return country;
+    } else if (address) {
+      return address;
+    } else if (physical_address) {
+      return physical_address;
+    }
+
+    return 'Location not specified';
+  };
+
+  const displayLocation = formatLocation();
+
+  // ✅ Debug final result
+  console.log("📍 Final Location Result:", name, {
+    displayLocation: displayLocation
   });
 
   // ✅ Normalize fields
@@ -59,25 +140,12 @@ console.log("✅ Verified Check:", {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 truncate">{name}</h3>
-                <p className="text-sm font-medium text-gray-500 truncate">{title}</p>
+                <p className="text-sm font-medium text-gray-500 truncate">{displayTitle}</p>
               </div>
 
               {/* ✅ Verified Badge */}
               {verified && (
-                <span className="flex-shrink-0 ml-2 bg-blue-500 text-white rounded-full p-1.5 shadow-md flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-3.5 w-3.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
+                <HiCheckCircle className="h-5 w-5 text-blue-500 ml-1" />
               )}
             </div>
 
@@ -85,7 +153,7 @@ console.log("✅ Verified Check:", {
             <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-gray-600">
               <span className="flex items-center">
                 <HiLocationMarker className="h-4 w-4 mr-1" />
-                {location}
+                {displayLocation}
               </span>
             </div>
 
@@ -93,7 +161,7 @@ console.log("✅ Verified Check:", {
             <div className="flex items-center mt-1">
               <HiStar className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="ml-1 text-sm text-gray-700">
-                {rating?.toFixed(1)}{' '}
+                {(rating || 3.5).toFixed(1)}{' '}
                 <span className="text-gray-500">(reviews)</span>
               </span>
             </div>
@@ -101,10 +169,10 @@ console.log("✅ Verified Check:", {
         </div>
 
         {/* Bio/Experience Preview */}
-        {(bio || provider.experience_pitch) && (
+        {(bio || experience_pitch) && (
           <div className="px-5 pb-4">
-            <p className="text-sm text-gray-700 line-clamp-2">
-              {provider.experience_pitch || bio}
+            <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+              {experience_pitch || bio}
             </p>
           </div>
         )}

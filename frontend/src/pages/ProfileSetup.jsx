@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { HiCheckCircle } from 'react-icons/hi';
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
@@ -221,7 +222,10 @@ const ProfileSetup = () => {
             <div className="text-center">
               <p className="text-sm font-medium text-green-700">CAC Status: {status}</p>
               {status === 'Verified' && (
-                <p className="text-green-600 font-semibold">CAC Registered ✅</p>
+                <p className="text-green-600 font-semibold flex items-center">
+                  <HiCheckCircle className="h-4 w-4 mr-2" />
+                  CAC Registered
+                </p>
               )}
             </div>
           )}

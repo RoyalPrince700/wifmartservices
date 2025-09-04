@@ -5,6 +5,7 @@ import { fetchProviderProfile } from '../services/api';
 import HireRequestModal from '../components/HireRequestModal';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import ChatWindow from '../components/ChatWindow';
+import { HiCheckCircle } from 'react-icons/hi';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -63,7 +64,7 @@ const ProfilePage = () => {
         />
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-800">{provider.name}</h1>
-          {verified && <span className="ml-2 text-blue-600">✅</span>}
+          {verified && <HiCheckCircle className="ml-2 h-6 w-6 text-blue-600" />}
           <p className="text-gray-600">{provider.skills?.join(', ')}</p>
           <p className="text-gray-500">{provider.location_state}</p>
           

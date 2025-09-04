@@ -83,6 +83,25 @@ const ProfileEdit = ({ setActiveTab }) => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Function to capitalize first letter and handle sentence capitalization
+  const handleExperienceChange = (e) => {
+    const { value } = e.target;
+
+    // Capitalize first letter of the entire text
+    let capitalizedValue = value;
+
+    if (value.length > 0) {
+      capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    // Capitalize first letter after sentence endings (. ! ?)
+    capitalizedValue = capitalizedValue.replace(/([.!?]\s*)([a-z])/g, (match, punctuation, letter) => {
+      return punctuation + letter.toUpperCase();
+    });
+
+    setFormData({ ...formData, experience_pitch: capitalizedValue });
+  };
+
 
 
   const addSkill = () => {
@@ -441,13 +460,13 @@ const ProfileEdit = ({ setActiveTab }) => {
             <textarea
               name="experience_pitch"
               value={formData.experience_pitch}
-              onChange={handleInputChange}
+              onChange={handleExperienceChange}
               rows={4}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Tell potential clients about your experience, expertise, and what makes you unique. Share your story, achievements, and why they should choose you..."
+              placeholder="Tell potential clients about your experience, expertise, and what makes you unique. Share your story, achievements, and why they should choose you. (First letter will be automatically capitalized)"
             />
             <p className="mt-1 text-xs text-gray-500">
-              This is your chance to pitch yourself and showcase your experience to potential clients.
+              This is your chance to pitch yourself and showcase your experience to potential clients. The first letter of each sentence will be automatically capitalized.
             </p>
           </div>
 

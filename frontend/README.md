@@ -2,7 +2,7 @@
 # Wifmart
 
 📌 **Overview**
-Wifmart is an online marketplace that connects service providers with clients. Service providers can create profiles, showcase portfolios, and allow clients to search and hire them. The platform simplifies hiring through skill-based and name-based searches.
+Wifmart is Nigeria's premier two-sided marketplace connecting skilled professionals with clients who need their services. Whether you're a graphic designer seeking new projects, a business owner looking for a web developer, or a vendor wanting to showcase your craft—Wifmart bridges the gap between talent and opportunity. Discover, connect, and collaborate with verified professionals across fashion, technology, events, and creative services.
 
 ---
 
@@ -159,5 +159,5 @@ Wifmart is an online marketplace that connects service providers with clients. S
 
 ## 🏗 Project Goal
 
-To create a fast, scalable marketplace that connects service providers and clients using the MERN stack, Google OAuth for authentication, and Cloudinary for media storage—ensuring a seamless hiring experience.
+To create Nigeria's most trusted two-sided marketplace that empowers both service providers and clients. For professionals: a platform to showcase skills, build portfolios, and find meaningful work. For clients: instant access to verified talent across Nigeria. Built with the MERN stack, Google OAuth authentication, and Cloudinary media storage to deliver seamless connections and growth opportunities.
 
