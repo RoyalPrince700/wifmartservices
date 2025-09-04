@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { HiSearch, HiArrowRight, HiSparkles, HiCode, HiPencilAlt, HiBriefcase, HiLocationMarker, HiOfficeBuilding, HiPhotograph, HiPencil, HiDesktopComputer, HiChip, HiX } from 'react-icons/hi';
+import { HiSearch, HiArrowRight, HiSparkles, HiCode, HiPencilAlt, HiBriefcase, HiLocationMarker, HiOfficeBuilding, HiPhotograph, HiPencil, HiDesktopComputer, HiChip, HiX, HiUser, HiBriefcase as HiWork } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -173,7 +173,7 @@ const Hero = () => {
   ];
 
   return (
-    <div className="relative bg-white min-h-screen overflow-hidden">
+    <div className="relative bg-white overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating geometric shapes */}
@@ -187,7 +187,7 @@ const Hero = () => {
         <div className={`absolute top-60 left-32 w-3 h-3 bg-cyan-400/30 rounded-full transition-all duration-[7000ms] ease-in-out ${isLoaded ? 'animate-bounce-slow' : ''}`}></div>
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8">
         <div className="text-center">
 
           {/* Main Heading */}
@@ -307,15 +307,33 @@ const Hero = () => {
                   ))}
                 </div>
 
-                {/* Search Button - Creative Design */}
-                <div className="flex justify-center pt-2">
+                {/* Dual CTA Buttons */}
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 w-full max-w-lg mx-auto">
+                  {/* CTA for Service Providers */}
                   <button
-                    type="submit"
-                    className="group relative inline-flex items-center px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-1 overflow-hidden text-lg"
+                    type="button"
+                    onClick={() => navigate('/dashboard')}
+                    className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-green-500/30 transform hover:scale-105 hover:-translate-y-1 overflow-hidden text-lg"
+                  >
+                    {/* Animated background effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    <HiUser className="relative w-5 h-5 mr-3 group-hover:scale-110 transition-all duration-300" />
+                    <span className="relative mr-3">Provide Services</span>
+                    <HiArrowRight className="relative w-5 h-5 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" />
+                    {/* Ripple effect */}
+                    <div className="absolute inset-0 rounded-2xl bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
+                  </button>
+
+                  {/* CTA for Clients */}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/browse-categories')}
+                    className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-1 overflow-hidden text-lg"
                   >
                     {/* Animated background effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-                    <span className="relative mr-3">Search</span>
+                    <HiWork className="relative w-5 h-5 mr-3 group-hover:scale-110 transition-all duration-300" />
+                    <span className="relative mr-3">Find Services</span>
                     <HiArrowRight className="relative w-5 h-5 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" />
                     {/* Ripple effect */}
                     <div className="absolute inset-0 rounded-2xl bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
