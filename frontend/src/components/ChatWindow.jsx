@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMessages, sendMessage, markMessagesAsRead } from '../services/api'; // ✅ Add markMessagesAsRead
 import { getSocket } from '../services/socket';
 import { AuthContext } from '../contexts/AuthContext';
+import Loading from './Loading';
 
 const ChatWindow = ({ otherUser, onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -154,7 +155,9 @@ const ChatWindow = ({ otherUser, onClose }) => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
         {loading ? (
-          <p className="text-center text-gray-500">Loading messages...</p>
+          <div className="flex items-center justify-center py-8">
+            <Loading variant="spinner" size="md" color="blue" text="Loading messages..." />
+          </div>
         ) : messages.length === 0 ? (
           <p className="text-center text-gray-500">No messages yet. Start the conversation!</p>
         ) : (

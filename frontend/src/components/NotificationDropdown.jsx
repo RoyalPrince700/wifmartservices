@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { getSocket } from '../services/socket';
 import { AuthContext } from '../contexts/AuthContext';
+import Loading from './Loading';
 
 const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
   const [notifications, setNotifications] = useState([]);
@@ -155,7 +156,9 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
       {/* List */}
       <div className="overflow-y-auto max-h-80">
         {loading ? (
-          <p className="p-4 text-center text-gray-500">Loading...</p>
+          <div className="p-4 text-center">
+            <Loading variant="spinner" size="sm" color="blue" text="Loading notifications..." />
+          </div>
         ) : notifications.length === 0 ? (
           <p className="p-4 text-center text-gray-500">No notifications yet.</p>
         ) : (

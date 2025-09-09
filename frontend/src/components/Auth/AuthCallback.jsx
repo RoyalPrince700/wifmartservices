@@ -3,6 +3,7 @@ import { useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext'; // Fixed path
 import api from '../../services/api';
+import Loading from '../Loading';
 
 function AuthCallback() {
   const { login  } = useContext(AuthContext);
@@ -42,7 +43,9 @@ function AuthCallback() {
   }, [location, login, navigate]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen">Loading...</div>
+    <div className="flex justify-center items-center min-h-screen">
+      <Loading variant="spinner" size="lg" color="blue" text="Authenticating..." />
+    </div>
   );
 }
 

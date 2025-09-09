@@ -10,8 +10,10 @@ import {
   HiUser,
   HiBell,
   HiArrowRight,
+  HiChatAlt,
 } from 'react-icons/hi';
 import { AuthContext } from '../contexts/AuthContext';
+import Loading from './Loading';
 import { getUnreadCount } from '../services/api';
 import { getSocket } from '../services/socket';
 import NotificationDropdown from './NotificationDropdown';
@@ -109,6 +111,11 @@ const Navbar = () => {
       path: '/dashboard',
       label: 'Dashboard',
       icon: HiViewGrid,
+    });
+    navItems.push({
+      path: '/chat',
+      label: 'Chat',
+      icon: HiChatAlt,
     });
     if (user?.role === 'admin') {
       navItems.push({
@@ -210,7 +217,7 @@ const Navbar = () => {
             {/* Right: Auth Button (Desktop) */}
             <div className="hidden md:flex items-center">
               {loading ? (
-                <span className="text-sm text-gray-500">Loading...</span>
+                <Loading variant="spinner" size="xs" color="blue" className="inline" />
               ) : !token && (
                 <Link
                   to="/signin"

@@ -5,6 +5,7 @@ import { fetchProviderProfile } from '../../services/api';
 import HireRequestModal from '../components/HireRequestModal';
 import { AuthContext } from '../../contexts/AuthContext';
 import ChatWindow from '../components/ChatWindow';
+import Loading from '../components/Loading';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -30,7 +31,11 @@ const ProfilePage = () => {
     loadProfile();
   }, [id]);
 
-  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loading variant="spinner" size="lg" color="blue" text="Loading profile..." />
+    </div>
+  );
   if (error || !provider) return <div className="text-center py-10 text-red-500">{error || 'Not found'}</div>;
 
   const handleHireClick = () => {

@@ -6,7 +6,7 @@ import {
   HiLocationMarker, HiStar, HiCheckCircle, HiChevronDown,
   HiX, HiArrowRight
 } from 'react-icons/hi';
-import { getFeaturedProviders, getCategoryCounts } from '../services/api';
+import { getAllProviders, getCategoryCounts } from '../services/api';
 
 const BrowseCategoriesMobile = () => {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ const BrowseCategoriesMobile = () => {
       try {
         setLoading(true);
         const [providersData, countsData] = await Promise.all([
-          getFeaturedProviders(),
+          getAllProviders(),
           getCategoryCounts()
         ]);
 

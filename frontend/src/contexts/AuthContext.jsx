@@ -5,6 +5,7 @@ import api from '../services/api';
 
 // ✅ Import Socket.IO functions
 import { initSocket, disconnectSocket } from '../services/socket';
+import Loading from '../components/Loading';
 
 export const AuthContext = createContext();
 
@@ -118,7 +119,11 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {loading ? <div className="loading">Loading...</div> : children}
+      {loading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading variant="spinner" size="lg" color="blue" text="Loading application..." />
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 };

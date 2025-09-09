@@ -72,6 +72,15 @@ export const getFeaturedProviders = async () => {
   }
 };
 
+export const getAllProviders = async () => {
+  try {
+    const response = await api.get('/api/search/all');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to fetch all providers';
+  }
+};
+
 export const getCategoryCounts = async () => {
   try {
     const response = await api.get('/api/search/categories/counts');

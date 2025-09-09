@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
+import Loading from '../Loading';
 
 const CACVerificationTab = () => {
   const [requests, setRequests] = useState([]);
@@ -73,7 +74,13 @@ const CACVerificationTab = () => {
     );
   };
 
-  if (loading) return <p className="text-center py-6">Loading CAC requests...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loading variant="spinner" size="lg" color="blue" text="Loading CAC requests..." />
+      </div>
+    );
+  }
 
   return (
     <div>

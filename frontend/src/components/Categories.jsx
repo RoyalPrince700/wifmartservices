@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HiCode, HiPencilAlt, HiPhotograph, HiMusicNote, HiAcademicCap, HiBriefcase, HiShoppingBag, HiArrowRight } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { getCategoryCounts } from '../services/api';
+import Loading from './Loading';
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ const Categories = () => {
 
   // Format count display
   const formatCount = (count) => {
-    if (loading) return 'Loading...';
+    if (loading) return <Loading variant="spinner" size="xs" color="blue" className="inline" />;
     return `${count || 0} provider${count === 1 ? '' : 's'}`;
   };
 

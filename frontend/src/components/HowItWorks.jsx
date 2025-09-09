@@ -302,7 +302,7 @@ const HowItWorks = () => {
                 {/* Button content */}
                 <span className="relative z-10 flex items-center">
                   <HiSparkles className="w-5 h-5 mr-3" />
-                  Become a Provider
+                  Provide Services
                   <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
 

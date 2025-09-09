@@ -106,6 +106,26 @@ export const getFeaturedProviders = async (req, res, next) => {
 };
 
 /**
+ * Get all service providers - for browse categories page
+ */
+export const getAllProviders = async (req, res, next) => {
+  try {
+    console.log('Fetching all providers...');
+
+    // Get all providers with basic info, sorted by newest first
+    const allProviders = await User.find({})
+    .select('name profile_image skills location_state isVerifiedBadge verification_status experience_pitch bio profile_completion rating totalReviews')
+    .sort({ createdAt: -1 }); // Sort by newest first
+
+    console.log('Found all providers:', allProviders.length);
+    res.json(allProviders);
+  } catch (error) {
+    console.error('All providers error:', error);
+    next(error);
+  }
+};
+
+/**
  * Get category counts - returns the number of providers in each category
  */
 export const getCategoryCounts = async (req, res, next) => {

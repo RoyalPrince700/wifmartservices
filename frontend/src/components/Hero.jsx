@@ -169,7 +169,7 @@ const Hero = () => {
   const quickSearches = [
     { label: 'Website Development', icon: HiDesktopComputer, color: 'text-blue-500' },
     { label: 'Bag Vendors', icon: HiPencilAlt, color: 'text-blue-600' },
-    { label: 'Graphic Design', icon: HiBriefcase, color: 'text-blue-700' },
+    { label: 'Event Planners', icon: HiBriefcase, color: 'text-blue-700' },
   ];
 
   return (

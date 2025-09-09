@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getSocket } from '../services/socket';
 import { AuthContext } from '../contexts/AuthContext';
 import { HiCheckCircle } from 'react-icons/hi';
+import Loading from '../components/Loading';
 
 const ChatPage = () => {
   const [conversations, setConversations] = useState([]);
@@ -207,8 +208,7 @@ const ChatPage = () => {
         <div className="flex-1 overflow-y-auto min-h-0">
           {conversationsLoading ? (
             <div className="p-4 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-500 mt-2 text-sm">Loading...</p>
+              <Loading variant="spinner" size="md" color="blue" text="Loading conversations..." />
             </div>
           ) : error ? (
             <div className="p-4 text-center">
@@ -305,7 +305,9 @@ const ChatPage = () => {
             {/* Messages Area - Scrollable */}
             <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3 min-h-0">
               {loading ? (
-                <p className="text-center text-gray-500 text-sm">Loading messages...</p>
+                <div className="flex items-center justify-center py-8">
+                  <Loading variant="spinner" size="md" color="blue" text="Loading messages..." />
+                </div>
               ) : messages.length === 0 ? (
                 <p className="text-center text-gray-500 text-sm">Start the conversation</p>
               ) : (

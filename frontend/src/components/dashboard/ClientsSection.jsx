@@ -6,11 +6,14 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
   return (
     <DashboardCard title="Requests to Hire You">
       {loading ? (
-        <Loading
-          variant="skeleton"
-          color="gray"
-          text="Loading hire requests..."
-        />
+        <div className="flex items-center justify-center py-12">
+          <Loading
+            variant="spinner"
+            size="lg"
+            color="blue"
+            text="Loading hire requests..."
+          />
+        </div>
       ) : hireRequests.length > 0 ? (
         <div className="space-y-3">
           {hireRequests.map((req) => {

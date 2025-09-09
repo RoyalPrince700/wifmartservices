@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { toast } from 'react-hot-toast';
+import Loading from '../components/Loading';
 
 // API Functions
 import {
@@ -228,7 +229,13 @@ const AdminDashboard = () => {
     );
   };
 
-  if (loading) return <div className="text-center py-10">Loading Admin Dashboard...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading variant="spinner" size="lg" color="blue" text="Loading Admin Dashboard..." />
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>

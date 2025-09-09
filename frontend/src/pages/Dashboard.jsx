@@ -304,13 +304,12 @@ const handleRenewBadge = () => {
   // Show loading screen while initial data is loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loading
-          variant="centered"
+          variant="spinner"
           size="lg"
           color="blue"
           text="Loading your dashboard..."
-          fullScreen={false}
         />
       </div>
     );

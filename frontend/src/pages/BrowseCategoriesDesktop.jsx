@@ -5,7 +5,7 @@ import {
   HiBriefcase, HiShoppingBag, HiFilter, HiSearch,
   HiLocationMarker, HiStar, HiCheckCircle, HiChevronDown
 } from 'react-icons/hi';
-import { getFeaturedProviders, getCategoryCounts, searchProviders } from '../services/api';
+import { getAllProviders, getCategoryCounts, searchProviders } from '../services/api';
 
 const BrowseCategoriesDesktop = () => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ const BrowseCategoriesDesktop = () => {
       try {
         setLoading(true);
         const [providersData, countsData] = await Promise.all([
-          getFeaturedProviders(),
+          getAllProviders(),
           getCategoryCounts()
         ]);
 

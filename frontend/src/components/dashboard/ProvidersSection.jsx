@@ -8,11 +8,14 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
   return (
     <DashboardCard title="Hired Providers">
       {loading ? (
-        <Loading
-          variant="skeleton"
-          color="gray"
-          text="Loading providers..."
-        />
+        <div className="flex items-center justify-center py-12">
+          <Loading
+            variant="spinner"
+            size="lg"
+            color="blue"
+            text="Loading providers..."
+          />
+        </div>
       ) : hiredProviders.length > 0 ? (
         <ul className="divide-y divide-gray-200">
           {hiredProviders.map((provider) => {

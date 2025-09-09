@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { getNotifications, markAsRead, markAllAsRead } from '../services/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading';
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -65,7 +66,11 @@ const NotificationPage = () => {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (loading) {
-    return <div className="p-6 text-center">Loading notifications...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading variant="spinner" size="lg" color="blue" text="Loading notifications..." />
+      </div>
+    );
   }
 
   return (
