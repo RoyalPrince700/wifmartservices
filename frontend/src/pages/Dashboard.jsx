@@ -24,6 +24,7 @@ import TabNavigation from '../components/dashboard/TabNavigation';
 import ProvidersSection from '../components/dashboard/ProvidersSection';
 import ClientsSection from '../components/dashboard/ClientsSection';
 import VerificationSection from '../components/dashboard/VerificationSection';
+import Loading from '../components/Loading';
 
 // Utility function to normalize IDs
 const normalizeId = (id) => {
@@ -299,6 +300,21 @@ const handleRenewBadge = () => {
     : 'monthly';
   handleBuyBadge(plan);
 };
+
+  // Show loading screen while initial data is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Loading
+          variant="centered"
+          size="lg"
+          color="blue"
+          text="Loading your dashboard..."
+          fullScreen={false}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">

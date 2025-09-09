@@ -1,46 +1,73 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { HiStar, HiLocationMarker, HiCheckCircle, HiArrowRight } from 'react-icons/hi';
-
-// Static featured providers data - no database fetch needed
-const staticFeaturedProviders = [
-  {
-    _id: 'featured-1',
-    name: "Royal Prince",
-    location_state: "Lagos, Nigeria",
-    profile_image: null,
-    skills: ["Website Development", "React", "Node.js"],
-    isVerifiedBadge: true,
-    verification_status: 'Approved',
-    experience_pitch: 'Senior Website Developer specializing in modern web technologies',
-    rating: 4.8
-  },
-  {
-    _id: 'featured-2',
-    name: "Adeyemi Favour",
-    location_state: "Abuja, Nigeria",
-    profile_image: null,
-    skills: ["WordPress", "Web Design", "E-commerce"],
-    isVerifiedBadge: true,
-    verification_status: 'Approved',
-    experience_pitch: 'Full-stack developer with expertise in WordPress and e-commerce solutions',
-    rating: 4.9
-  },
-  {
-    _id: 'featured-3',
-    name: "Oladipo Favour",
-    location_state: "Kano, Nigeria",
-    profile_image: null,
-    skills: ["Video Editing", "Motion", "After Effects"],
-    isVerifiedBadge: true,
-    verification_status: 'Approved',
-    experience_pitch: 'Creative video editor specializing in motion graphics and visual effects',
-    rating: 4.6
-  }
-];
+import { getFeaturedProviders } from '../services/api';
 
 const FeaturedProviders = () => {
-  // Use static data directly - no loading state or API calls needed
-  const providers = staticFeaturedProviders;
+  const [allProviders, setAllProviders] = useState([]);
+  const [visibleProviders, setVisibleProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef();
+
+  // Initially load 1 provider, then progressively load more
+  const INITIAL_LOAD = 1;
+  const LOAD_MORE_COUNT = 1;
+
+  useEffect(() => {
+    const fetchFeaturedProviders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getFeaturedProviders();
+        setAllProviders(data);
+        // Initially show only first provider
+        setVisibleProviders(data.slice(0, INITIAL_LOAD));
+        setHasMore(data.length > INITIAL_LOAD);
+      } catch (err) {
+        console.error('Error fetching featured providers:', err);
+        setError('Failed to load featured providers');
+        setAllProviders([]);
+        setVisibleProviders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProviders();
+  }, []);
+
+  const loadMoreProviders = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    setTimeout(() => {
+      const currentCount = visibleProviders.length;
+      const nextCount = Math.min(currentCount + LOAD_MORE_COUNT, allProviders.length);
+
+      setVisibleProviders(allProviders.slice(0, nextCount));
+      setHasMore(nextCount < allProviders.length);
+      setLoadingMore(false);
+    }, 500); // Small delay to show loading state
+  }, [visibleProviders.length, allProviders, loadingMore, hasMore]);
+
+  const lastProviderRef = useCallback((node) => {
+    if (loading || loadingMore) return;
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMoreProviders();
+      }
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px'
+    });
+
+    if (node) observerRef.current.observe(node);
+  }, [loading, loadingMore, hasMore, loadMoreProviders]);
 
   // Format location (similar to SearchResultCard)
   const formatLocation = (provider) => {
@@ -55,6 +82,87 @@ const FeaturedProviders = () => {
     return provider?.isVerifiedBadge === true || provider?.verification_status?.toLowerCase() === "approved";
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <section className="pt-8 pb-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">Featured Service Providers</h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Discover top-rated professionals ready to help with your projects
+            </p>
+          </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                <div className="flex p-5 pb-4 gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section className="pt-8 pb-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">Featured Service Providers</h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Discover top-rated professionals ready to help with your projects
+            </p>
+          </div>
+          <div className="mt-10 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-red-600">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state
+  if (!loading && visibleProviders.length === 0) {
+    return (
+      <section className="pt-8 pb-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">Featured Service Providers</h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Discover top-rated professionals ready to help with your projects
+            </p>
+          </div>
+          <div className="mt-10 text-center">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-gray-600">No featured providers available at the moment.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="pt-8 pb-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,7 +174,7 @@ const FeaturedProviders = () => {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {providers.map((provider) => {
+          {visibleProviders.map((provider, index) => {
             const {
               _id,
               name = 'Unknown',
@@ -88,7 +196,12 @@ const FeaturedProviders = () => {
             const verified = isVerified(provider);
 
             return (
-              <Link key={_id} to={`/profile/${_id}`} className="block">
+              <Link
+                key={_id}
+                to={`/profile/${_id}`}
+                className="block"
+                ref={index === visibleProviders.length - 1 ? lastProviderRef : null}
+              >
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                   {/* Header: Image & Name */}
                   <div className="flex p-5 pb-4 gap-4">
@@ -169,6 +282,43 @@ const FeaturedProviders = () => {
               </Link>
             );
           })}
+
+          {/* Loading skeletons for lazy loading */}
+          {loadingMore && (
+            [...Array(LOAD_MORE_COUNT)].map((_, index) => (
+              <div key={`loading-${index}`} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                <div className="flex p-5 pb-4 gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-1"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+                {/* Bio section skeleton */}
+                <div className="px-5 pb-4">
+                  <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-4/5 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-3/5"></div>
+                </div>
+                {/* Skills section skeleton */}
+                <div className="px-5 pb-5">
+                  <div className="flex gap-2 mt-2">
+                    <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-14"></div>
+                  </div>
+                </div>
+                {/* CTA button skeleton */}
+                <div className="px-5 pt-2 pb-5">
+                  <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="mt-10 text-center">

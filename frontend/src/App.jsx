@@ -12,6 +12,7 @@ import SearchInput from './pages/SearchInput';
 import ProfilePage from './pages/ProfilePage';
 import AuthCallback from './components/Auth/AuthCallback';
 import ProtectedLayout from './components/Auth/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 import AdminDashboard from './pages/AdminDashboard';
 import BadgeVerificationPage from './pages/BadgeVerificationPage';
 import ChatPage from './pages/ChatPage';
@@ -42,6 +43,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <ScrollToTop />
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />

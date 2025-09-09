@@ -1,15 +1,16 @@
 import { DashboardCard } from './UIComponents';
 import toast from 'react-hot-toast';
+import Loading from '../Loading';
 
 const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdateStatus }) => {
   return (
     <DashboardCard title="Requests to Hire You">
       {loading ? (
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-gray-100 rounded-xl"></div>
-          ))}
-        </div>
+        <Loading
+          variant="skeleton"
+          color="gray"
+          text="Loading hire requests..."
+        />
       ) : hireRequests.length > 0 ? (
         <div className="space-y-3">
           {hireRequests.map((req) => {

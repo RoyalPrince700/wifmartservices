@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { DashboardCard, StatusBadge } from './UIComponents';
+import Loading from '../Loading';
 
 const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest }) => {
   const navigate = useNavigate();
@@ -7,11 +8,11 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
   return (
     <DashboardCard title="Hired Providers">
       {loading ? (
-        <div className="animate-pulse space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-16 bg-gray-200 rounded"></div>
-          ))}
-        </div>
+        <Loading
+          variant="skeleton"
+          color="gray"
+          text="Loading providers..."
+        />
       ) : hiredProviders.length > 0 ? (
         <ul className="divide-y divide-gray-200">
           {hiredProviders.map((provider) => {

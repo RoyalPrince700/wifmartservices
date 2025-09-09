@@ -5,6 +5,7 @@ import debounce from "lodash/debounce";
 import SearchResultCard from '../../src/components/SearchResultCard';
 import { searchProviders } from '../../src/services/api';
 import toast from 'react-hot-toast';
+import Loading from '../components/Loading';
 
 const SearchResultsMobile = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -199,9 +200,13 @@ const SearchResultsMobile = () => {
       {/* Main Content */}
       <div className="px-4 py-4">
         {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Finding providers...</span>
+          <div className="py-12">
+            <Loading
+              variant="centered"
+              size="md"
+              color="blue"
+              text="Finding providers..."
+            />
           </div>
         )}
 

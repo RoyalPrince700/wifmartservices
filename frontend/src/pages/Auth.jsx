@@ -1,3 +1,4 @@
+//frontend/src/pages/Auth.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import GoogleSignIn from "../components/Auth/GoogleSignIn.jsx";

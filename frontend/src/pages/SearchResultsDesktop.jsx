@@ -5,6 +5,7 @@ import debounce from "lodash/debounce";
 import SearchResultCard from '../../src/components/SearchResultCard';
 import { searchProviders } from '../../src/services/api';
 import toast from 'react-hot-toast';
+import Loading from '../components/Loading';
 
 const SearchResultsDesktop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -250,11 +251,13 @@ const SearchResultsDesktop = () => {
 
         {/* Results Section */}
         {loading && (
-          <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <span className="ml-4 text-lg text-gray-600">Finding the best service providers for you...</span>
-            </div>
+          <div className="py-16">
+            <Loading
+              variant="centered"
+              size="lg"
+              color="blue"
+              text="Finding the best service providers for you..."
+            />
           </div>
         )}
 
