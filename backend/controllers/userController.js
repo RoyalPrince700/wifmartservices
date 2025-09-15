@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Service from '../models/Service.js';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload.js';
 import { calculateProfileCompletion } from '../utils/profileUtils.js';
+import cloudinary from '../config/cloudinary.js';
 
 /**
  * Get user by ID (public)
@@ -69,6 +70,7 @@ export const setupProfile = async (req, res, next) => {
       location_state,
       physical_address,
       cac_number,
+      portfolio_images_to_delete,
     } = req.body;
 
     const updateData = {};
@@ -112,6 +114,38 @@ export const setupProfile = async (req, res, next) => {
     // ✅ CAC
     if (cac_number) updateData.cac_number = cac_number;
 
+    // ✅ Handle portfolio image deletions
+    if (portfolio_images_to_delete) {
+      const imagesToDelete = Array.isArray(portfolio_images_to_delete)
+        ? portfolio_images_to_delete
+        : [portfolio_images_to_delete];
+
+      if (imagesToDelete.length > 0) {
+        // Delete from Cloudinary
+        const deletePromises = imagesToDelete.map(async (url) => {
+          try {
+            // Extract public_id from Cloudinary URL
+            const urlParts = url.split('/');
+            const filename = urlParts[urlParts.length - 1];
+            const publicId = `wifmart/portfolio/${filename.split('.')[0]}`;
+
+            await cloudinary.uploader.destroy(publicId);
+          } catch (error) {
+            console.error('Error deleting from Cloudinary:', error);
+          }
+        });
+
+        await Promise.all(deletePromises);
+
+        // Filter out deleted images from user's portfolio_images
+        if (req.user.portfolio_images) {
+          updateData.portfolio_images = req.user.portfolio_images.filter(
+            image => !imagesToDelete.includes(image.url)
+          );
+        }
+      }
+    }
+
     // ✅ Handle file uploads
     if (req.files) {
       // 🖼️ Profile Image
@@ -140,9 +174,12 @@ export const setupProfile = async (req, res, next) => {
         });
         const newImages = await Promise.all(uploadPromises);
 
+        // Get current portfolio images (after any deletions)
+        const currentPortfolioImages = updateData.portfolio_images || req.user.portfolio_images || [];
+
         updateData.portfolio_images = [
-          ...(req.user.portfolio_images || []), // Keep old
-          ...newImages                          // Add new
+          ...currentPortfolioImages,  // Keep existing (after deletions)
+          ...newImages                // Add new
         ];
       }
     }

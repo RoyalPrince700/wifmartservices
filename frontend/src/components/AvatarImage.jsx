@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { HiUser } from 'react-icons/hi';
 
 // Reusable Avatar Component with Error Handling
-const AvatarImage = ({ src, alt, name, size = "h-16 w-16", className = "" }) => {
+const AvatarImage = ({ src, alt, name, size = "h-16 w-16", className = "", onClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -46,14 +46,20 @@ const AvatarImage = ({ src, alt, name, size = "h-16 w-16", className = "" }) => 
 
   if (imageError || !src) {
     return (
-      <div className={`${size} rounded-full ${getColor(name)} flex items-center justify-center text-white font-semibold text-lg ${className}`}>
+      <div
+        className={`${size} rounded-full ${getColor(name)} flex items-center justify-center text-white font-semibold text-lg ${className} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+        onClick={onClick}
+      >
         {getInitials(name)}
       </div>
     );
   }
 
   return (
-    <div className={`${size} rounded-full overflow-hidden bg-gray-200 flex items-center justify-center relative ${className}`}>
+    <div
+      className={`${size} rounded-full overflow-hidden bg-gray-200 flex items-center justify-center relative ${className} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      onClick={onClick}
+    >
       {!imageLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
           <HiUser className="h-6 w-6 text-gray-400" />

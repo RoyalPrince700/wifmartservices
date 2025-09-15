@@ -39,6 +39,7 @@ const ProfileEdit = ({ setActiveTab }) => {
     cac_certificate: null,
     portfolio_images: [],        // New files to upload
     portfolio_image_urls: [],     // Existing URLs from DB
+    portfolio_images_to_delete: [], // Track which existing images to delete
   });
 
   const [newSkill, setNewSkill] = useState('');
@@ -169,6 +170,15 @@ const ProfileEdit = ({ setActiveTab }) => {
     });
   };
 
+  const removeExistingPortfolioImage = (index) => {
+    const imageUrl = formData.portfolio_image_urls[index];
+    setFormData({
+      ...formData,
+      portfolio_image_urls: formData.portfolio_image_urls.filter((_, i) => i !== index),
+      portfolio_images_to_delete: [...formData.portfolio_images_to_delete, imageUrl],
+    });
+  };
+
   const removeProfileImage = () => {
     setFormData({ ...formData, profile_image: null });
   };
@@ -186,6 +196,9 @@ const ProfileEdit = ({ setActiveTab }) => {
         if (formData.skills.length > 0) {
           uploadFormData.append('skills', formData.skills.join(', '));
         }
+      } else if (key === 'portfolio_images_to_delete') {
+        // Send portfolio images to delete as separate entries
+        formData[key].forEach(url => uploadFormData.append('portfolio_images_to_delete', url));
       } else if (Array.isArray(formData[key])) {
         formData[key].forEach(item => uploadFormData.append(key, item));
       } else if (formData[key]) {
@@ -219,7 +232,8 @@ const ProfileEdit = ({ setActiveTab }) => {
   const maxPortfolio = user?.verification_status === 'Approved' ? 10 : 3;
   const totalExisting = formData.portfolio_image_urls.length;
   const totalNew = formData.portfolio_images.length;
-  const totalUploaded = totalExisting + totalNew;
+  const totalToDelete = formData.portfolio_images_to_delete.length;
+  const totalUploaded = totalExisting + totalNew - totalToDelete;
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -298,7 +312,15 @@ const ProfileEdit = ({ setActiveTab }) => {
         alt={`Portfolio ${index}`}
         className="w-full h-20 object-cover rounded border-2 border-blue-400"
       />
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+      <button
+        type="button"
+        onClick={() => removeExistingPortfolioImage(index)}
+        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-70"
+        title="Remove this image"
+      >
+        <span className="text-lg font-bold">✕</span>
+      </button>
+      <div className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded opacity-75">
         Saved
       </div>
     </div>

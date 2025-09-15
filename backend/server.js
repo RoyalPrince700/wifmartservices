@@ -1,3 +1,4 @@
+// backend/server.js
 // 👇 Step 1: Load environment variables FIRST
 import 'dotenv/config';
 
@@ -139,11 +140,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('send-message', (data) => {
-    const { chatId, message, senderId, receiverId, timestamp } = data;
+    const { chatId, message, senderId, receiverId, timestamp, messageId } = data;
 
     // Broadcast the message to all users in the chat room (except sender)
     socket.to(chatId).emit('new-message', {
-      _id: Date.now().toString(), // Temporary ID for real-time updates
+      _id: messageId || Date.now().toString(), // Prefer real message id if available
       message,
       senderId: { _id: senderId },
       receiverId: { _id: receiverId },
@@ -151,6 +152,14 @@ io.on('connection', (socket) => {
     });
 
     console.log(`Message sent in chat ${chatId}: ${message}`);
+
+    // Emit delivery acknowledgment back to sender
+    socket.emit('message-delivered', {
+      chatId,
+      messageId: messageId || null,
+      receiverId,
+      timestamp: Date.now(),
+    });
   });
 
   socket.on('disconnect', () => {

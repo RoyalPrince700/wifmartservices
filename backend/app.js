@@ -1,3 +1,4 @@
+// backend/app.js
 // Load env vars early
 import 'dotenv/config';
 

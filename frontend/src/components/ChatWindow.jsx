@@ -10,6 +10,7 @@ const ChatWindow = ({ otherUser, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef();
   const { user: currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -115,9 +116,10 @@ const ChatWindow = ({ otherUser, onClose }) => {
   // Send message
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (isSending || !newMessage.trim()) return;
 
     try {
+      setIsSending(true);
       const sentMsg = await sendMessage(otherUser._id, newMessage);
 
       // Emit real-time message to other user
@@ -147,6 +149,8 @@ const ChatWindow = ({ otherUser, onClose }) => {
     } catch (err) {
       console.error('Failed to send message:', err);
       alert('Could not send message. Please try again.');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -197,13 +201,17 @@ const ChatWindow = ({ otherUser, onClose }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isSending}
+            className={`flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isSending ? 'opacity-70 cursor-not-allowed' : ''}`}
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white rounded-full px-6 hover:bg-blue-700 transition"
+            disabled={isSending || !newMessage.trim()}
+            className={`bg-blue-600 text-white rounded-full px-6 transition ${
+              isSending || !newMessage.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+            }`}
           >
-            Send
+            {isSending ? 'Sending…' : 'Send'}
           </button>
         </div>
       </form>

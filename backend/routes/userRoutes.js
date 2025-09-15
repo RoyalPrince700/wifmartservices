@@ -29,6 +29,16 @@ router.post(
     { name: 'cac_certificate', maxCount: 1 },
     { name: 'portfolio_images', maxCount: 10 } // ✅ Updated to match frontend limit
   ]),
+  (req, res, next) => {
+    // Handle portfolio_images_to_delete as a form field (not a file)
+    if (req.body.portfolio_images_to_delete) {
+      // Ensure it's an array
+      req.body.portfolio_images_to_delete = Array.isArray(req.body.portfolio_images_to_delete)
+        ? req.body.portfolio_images_to_delete
+        : [req.body.portfolio_images_to_delete];
+    }
+    next();
+  },
   setupProfile
 );
 router.get('/profile', authMiddleware, getProfile);

@@ -79,4 +79,14 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true, // Adds `createdAt` and `updatedAt`
 });
+
+// Virtual property to get role based on isAdmin
+userSchema.virtual('role').get(function() {
+  return this.isAdmin ? 'admin' : 'user';
+});
+
+// Ensure virtual fields are serialized
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
+
 export default mongoose.model('User', userSchema);

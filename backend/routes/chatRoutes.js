@@ -1,6 +1,7 @@
 // backend/routes/chatRoutes.js
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware.js';
+import ChatMessage from '../models/ChatMessage.js';
 import {
   startChat,
   getConversations,

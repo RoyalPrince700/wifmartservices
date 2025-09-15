@@ -13,6 +13,7 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [conversationsLoading, setConversationsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,7 +24,7 @@ const ChatPage = () => {
 
   // Create unique chat room ID
   const getChatRoomId = (user1Id, user2Id) => {
-    return [user1Id, user2Id].sort().join('-');
+    return [user1Id, user2Id].sort().join('_');
   };
 
   // Setup real-time listeners
@@ -40,10 +41,50 @@ const ChatPage = () => {
     };
 
     socket.on('new-message', handleNewMessage);
+    socket.on('message-delivered', ({ chatId: incomingChatId, messageId, receiverId }) => {
+      if (incomingChatId !== chatRoomId) return;
+      setMessages((prev) => {
+        const updated = [...prev];
+        if (messageId) {
+          const idx = updated.findIndex((m) => m._id === messageId);
+          if (idx !== -1) {
+            updated[idx] = { ...updated[idx], delivered: true };
+            return updated;
+          }
+        }
+        for (let i = updated.length - 1; i >= 0; i--) {
+          const m = updated[i];
+          const senderId = m.senderId?._id || m.senderId;
+          const recId = m.receiverId?._id || m.receiverId;
+          if (senderId === currentUser._id && recId === receiverId && !m.delivered) {
+            updated[i] = { ...m, delivered: true };
+            break;
+          }
+        }
+        return updated;
+      });
+    });
+    socket.on('message-read', ({ chatId, readerId }) => {
+      if (chatId !== chatRoomId) return;
+      // Mark messages sent by current user to this reader as read
+      setMessages((prev) =>
+        prev.map((m) => {
+          const receiverId = m.receiverId?._id || m.receiverId;
+          if (!m.read && receiverId === readerId) {
+            return { ...m, read: true };
+          }
+          return m;
+        })
+      );
+      // Refresh conversations list to update unread badges
+      loadConversations();
+    });
     socket.on('connect', handleReconnect);
 
     return () => {
       socket.off('new-message', handleNewMessage);
+      socket.off('message-delivered');
+      socket.off('message-read');
       socket.off('connect', handleReconnect);
       socket.emit('leave-chat', chatRoomId);
     };
@@ -80,7 +121,12 @@ const ChatPage = () => {
     setLoading(true);
     try {
       const data = await getMessages(conv.otherUser._id);
-      setMessages(data);
+      const normalized = data.map((m) => {
+        const senderId = m.senderId?._id || m.senderId;
+        const isOutgoing = currentUser && senderId === currentUser._id;
+        return { ...m, delivered: isOutgoing ? true : m.delivered };
+      });
+      setMessages(normalized);
       await markMessagesAsRead(conv.otherUser._id);
     } catch (err) {
       console.error('Failed to load messages:', err);
@@ -98,9 +144,10 @@ const ChatPage = () => {
   // Send a message
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedChat) return;
+    if (isSending || !newMessage.trim() || !selectedChat) return;
 
     try {
+      setIsSending(true);
       const sentMsg = await sendMessage(selectedChat._id, newMessage);
 
       const socket = getSocket();
@@ -112,16 +159,19 @@ const ChatPage = () => {
           senderId: sentMsg.senderId._id || sentMsg.senderId,
           receiverId: sentMsg.receiverId._id || sentMsg.receiverId,
           timestamp: sentMsg.timestamp,
+          messageId: sentMsg._id,
         });
       }
 
-      setMessages((prev) => [...prev, sentMsg]);
+      setMessages((prev) => [...prev, { ...sentMsg, delivered: false }]);
       setNewMessage('');
       // Focus input after send
       inputRef.current?.focus();
     } catch (err) {
       console.error('Failed to send message:', err);
       alert('Failed to send message');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -325,13 +375,20 @@ const ChatPage = () => {
                           : 'bg-blue-600 text-white'
                       }`}
                     >
-                      <p>{msg.message}</p>
-                      <span className="text-xs opacity-90 mt-1 block">
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
+                      <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                      <div className={`mt-1 flex items-center ${msg.senderId._id === selectedChat._id ? 'justify-start' : 'justify-end'}`}>
+                        <span className="text-[10px] opacity-90">
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        {msg.senderId._id !== selectedChat._id && (
+                          <span className="ml-2 text-[10px] opacity-90">
+                            {msg.read ? 'Read' : 'Sent'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
@@ -342,20 +399,29 @@ const ChatPage = () => {
             {/* Message Input - Fixed at Bottom */}
             <form onSubmit={handleSend} className="shrink-0 p-3 sm:p-4 bg-white border-t sticky bottom-0">
               <div className="flex gap-2">
-                <input
+                <textarea
                   ref={inputRef}
                   id="chat-input"
-                  type="text"
+                  rows={1}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSend(e);
+                    }
+                  }}
+                  placeholder="Type a message... (Ctrl/⌘+Enter to send)"
+                  className="flex-1 border border-gray-300 rounded-2xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white rounded-full px-4 py-2 hover:bg-blue-700 text-sm font-medium"
+                  disabled={isSending || !newMessage.trim()}
+                  className={`bg-blue-600 text-white rounded-full px-4 py-2 text-sm font-medium ${
+                    isSending || !newMessage.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}
                 >
-                  Send
+                  {isSending ? 'Sending…' : 'Send'}
                 </button>
               </div>
             </form>

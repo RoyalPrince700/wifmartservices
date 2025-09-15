@@ -8,6 +8,9 @@ import ChatWindow from '../components/ChatWindow';
 import { HiCheckCircle } from 'react-icons/hi';
 import Loading from '../components/Loading';
 import AvatarImage from '../components/AvatarImage';
+import instagramIcon from '../assets/social-insta.svg';
+import linkedinIcon from '../assets/social-linkedin.svg';
+import xIcon from '../assets/social-x.svg';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -17,6 +20,9 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedPortfolioImage, setSelectedPortfolioImage] = useState(null);
+  const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState(null);
   const { user: currentUser } = useContext(AuthContext);
 
   useEffect(() => {
@@ -79,10 +85,31 @@ const ProfilePage = () => {
     setShowChat(true); // Open chat modal
   };
 
+  const handleImageClick = () => {
+    setSelectedPortfolioImage(null);
+    setSelectedPortfolioIndex(null);
+    setShowImageModal(true);
+  };
+
+  const handlePortfolioImageClick = (image, index) => {
+    setSelectedPortfolioImage(image);
+    setSelectedPortfolioIndex(index);
+    setShowImageModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Blue banner */}
-      <div className="h-40 bg-gradient-to-r from-blue-700 to-blue-600" />
+      <div className="h-40 bg-gradient-to-r from-blue-700 to-blue-600 relative">
+        {/* Share button in top-right corner */}
+        <button
+          onClick={copyProfileLink}
+          className="absolute top-4 right-4 px-3 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-md"
+          title="Share Profile"
+        >
+          🔗 Share
+        </button>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 -mt-16 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -96,6 +123,7 @@ const ProfilePage = () => {
                   name={provider.name}
                   size="h-24 w-24"
                   className="ring-4 ring-white shadow-md"
+                  onClick={handleImageClick}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -118,40 +146,57 @@ const ProfilePage = () => {
                 </div>
               )}
 
-              <div className="mt-6 flex gap-3">
-                <button onClick={handleHireClick} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  💼 Hire
-                </button>
-                {currentUser && String(currentUser._id) !== String(provider._id) && (
-                  <button onClick={handleSendMessage} className="flex-1 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
-                    💬 Message
+              {/* Action Buttons - Responsive Layout */}
+              <div className="mt-6 space-y-3">
+                {/* Desktop: 2 buttons in a row */}
+                <div className="hidden lg:flex gap-3">
+                  <button onClick={handleHireClick} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    💼 Hire
                   </button>
-                )}
-                <button onClick={copyProfileLink} className="px-4 py-2.5 border rounded-lg text-gray-700 hover:bg-gray-50">
-                  🔗 Share
-                </button>
+                  {currentUser && String(currentUser._id) !== String(provider._id) && (
+                    <button onClick={handleSendMessage} className="flex-1 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+                      💬 Message
+                    </button>
+                  )}
+                </div>
+
+                {/* Tablet/Mobile: Stack buttons vertically */}
+                <div className="lg:hidden space-y-3">
+                  <button onClick={handleHireClick} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    💼 Hire
+                  </button>
+                  {currentUser && String(currentUser._id) !== String(provider._id) && (
+                    <button onClick={handleSendMessage} className="w-full px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+                      💬 Message
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Socials / Links */}
               <div className="mt-6 space-y-2">
                 {provider.portfolio_link && (
-                  <a href={provider.portfolio_link} target="_blank" rel="noopener noreferrer" className="block text-blue-700 hover:underline">
-                    🌐 Portfolio Website
+                  <a href={provider.portfolio_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700 hover:underline">
+                    <span className="text-gray-500">🌐</span>
+                    Portfolio Website
                   </a>
                 )}
                 {provider.instagram_handle && (
-                  <a href={`https://instagram.com/${provider.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="block text-gray-700 hover:text-blue-700">
-                    📸 Instagram @{provider.instagram_handle}
+                  <a href={`https://instagram.com/${provider.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
+                    <img src={instagramIcon} alt="Instagram" className="w-4 h-4" />
+                    Instagram @{provider.instagram_handle}
                   </a>
                 )}
                 {provider.x_handle && (
-                  <a href={`https://x.com/${provider.x_handle.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="block text-gray-700 hover:text-blue-700">
-                    ✖️ X {provider.x_handle}
+                  <a href={`https://x.com/${provider.x_handle.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
+                    <img src={xIcon} alt="X" className="w-4 h-4" />
+                    X {provider.x_handle}
                   </a>
                 )}
                 {provider.linkedin_handle && (
-                  <a href={provider.linkedin_handle} target="_blank" rel="noopener noreferrer" className="block text-gray-700 hover:text-blue-700">
-                    💼 LinkedIn
+                  <a href={provider.linkedin_handle} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
+                    <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4" />
+                    LinkedIn
                   </a>
                 )}
               </div>
@@ -183,8 +228,9 @@ const ProfilePage = () => {
                       key={index}
                       src={typeof image === 'string' ? image : image.url}
                       alt={`Portfolio ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-lg border"
+                      className="w-full h-48 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
                       loading="lazy"
+                      onClick={() => handlePortfolioImageClick(image, index)}
                     />
                   ))}
                 </div>
@@ -227,11 +273,14 @@ const ProfilePage = () => {
 
       {/* Chat Modal */}
       {showChat && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-96 flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">Chat with {provider.name}</h3>
-              <div className="flex items-center gap-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start md:items-center justify-center z-50 p-2 md:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full md:max-w-md h-[85vh] md:h-auto max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b sticky top-0 bg-white z-10">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">{provider.name}</h3>
+                <button onClick={() => setShowChat(false)} className="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
+              </div>
+              <div className="mt-2">
                 <button
                   onClick={() => {
                     setShowChat(false);
@@ -241,12 +290,35 @@ const ProfilePage = () => {
                 >
                   Open Full Chat
                 </button>
-                <button onClick={() => setShowChat(false)} className="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
               </div>
             </div>
             <div className="flex-1 overflow-hidden">
               <ChatWindow otherUser={provider} onClose={() => setShowChat(false)} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute -top-12 right-0 text-white text-4xl hover:text-gray-300 transition-colors z-10"
+              aria-label="Close image modal"
+            >
+              &times;
+            </button>
+            <img
+              src={selectedPortfolioImage ? (typeof selectedPortfolioImage === 'string' ? selectedPortfolioImage : selectedPortfolioImage.url) : provider.profile_image}
+              alt={selectedPortfolioImage ? `Portfolio ${selectedPortfolioIndex + 1}` : `${provider.name}'s profile picture`}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}

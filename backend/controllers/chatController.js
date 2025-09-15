@@ -68,20 +68,27 @@ export const getConversations = async (req, res, next) => {
     const latestPerChat = new Map();
 
     messages.forEach((msg) => {
-      const otherId = msg.senderId._id.toString() === userId.toString()
-        ? msg.receiverId._id.toString()
-        : msg.senderId._id.toString();
+      // Skip messages with missing participants (e.g., deleted users)
+      if (!msg || !msg.senderId || !msg.receiverId) {
+        return;
+      }
 
-      const key = [userId.toString(), otherId].sort().join('_');
+      const isSenderCurrentUser = msg.senderId._id?.toString() === userId.toString();
+      const otherUserDoc = isSenderCurrentUser ? msg.receiverId : msg.senderId;
+      const otherUserId = otherUserDoc?._id?.toString();
+
+      if (!otherUserId) {
+        return; // safety: skip malformed records
+      }
+
+      const key = [userId.toString(), otherUserId].sort().join('_');
 
       if (!latestPerChat.has(key)) {
         latestPerChat.set(key, {
-          otherUser: msg.senderId._id.toString() === userId.toString()
-            ? msg.receiverId
-            : msg.senderId,
+          otherUser: otherUserDoc,
           lastMessage: msg.message,
           timestamp: msg.timestamp,
-          unread: !msg.read && msg.receiverId._id.toString() === userId.toString(),
+          unread: !msg.read && msg.receiverId?._id?.toString() === userId.toString(),
         });
       }
     });
