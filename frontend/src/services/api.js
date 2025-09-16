@@ -176,6 +176,15 @@ export const getAdminPortfolios = async (page = 1, limit = 10) => {
   }
 };
 
+export const getVerifiedUsers = async (page = 1, limit = 10) => {
+  try {
+    const response = await api.get('/api/admin/verified-users', { params: { page, limit } });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || 'Failed to fetch verified users';
+  }
+};
+
 export const deleteAdminPortfolio = async (id) => {
   try {
     const response = await api.delete(`/api/admin/portfolios/${id}`);

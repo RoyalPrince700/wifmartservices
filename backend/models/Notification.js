@@ -8,6 +8,11 @@ const notificationSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    // Optional sender reference for message-type notifications (who triggered it)
+    fromUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     type: {
       type: String,
       enum: [
@@ -35,6 +40,11 @@ const notificationSchema = new mongoose.Schema(
     onModel: {
       type: String,
       enum: ['Service', 'ChatMessage', 'User'],
+    },
+    // Flexible metadata for additional context like senderId, chatId, etc.
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
   },
   { timestamps: true }

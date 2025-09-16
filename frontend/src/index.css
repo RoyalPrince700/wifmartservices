@@ -22,7 +22,7 @@ html, body, #root {
     height: -webkit-fill-available;
   }
 
-@layer components { 
+@layer components {
     .btn {
          @apply bg-black tracking-tight px-4 py-2 inline-flex items-center rounded-lg justify-center text-white font-medium;
     }
@@ -52,10 +52,15 @@ html, body, #root {
     .card {
         @apply p-10 border border-[#222222]/10 rounded-3xl shadow-[0_7px_14px_#EAEAEA] max-w-xs w-full;
     }
-     
-      
-      
-      
+
+    /* Custom scrollbar utilities */
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;  /* Safari and Chrome */
+    }
 }
 body {
     background: transparent;

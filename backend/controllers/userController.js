@@ -259,6 +259,17 @@ export const getHiredProviders = async (req, res, next) => {
           hireDate: service.created_at || service.createdAt,
           status: service.status,
           serviceId: service._id,
+          // ✅ Include the exact details the client submitted when hiring
+          requestDetails: {
+            title: service.title,
+            message: service.message,
+            eventDate: service.event_date,
+            location: service.location,
+            budget: service.budget,
+            phone: service.phone,
+            email: service.email,
+            attachmentUrl: service.attachment_url,
+          },
         };
       }
 
@@ -274,6 +285,17 @@ export const getHiredProviders = async (req, res, next) => {
         isVerifiedBadge: service.provider_id.isVerifiedBadge,
         isVerified: service.provider_id.verification_status === 'Approved',
         verification_status: service.provider_id.verification_status,
+        // ✅ Include the exact details the client submitted when hiring
+        requestDetails: {
+          title: service.title,
+          message: service.message,
+          eventDate: service.event_date,
+          location: service.location,
+          budget: service.budget,
+          phone: service.phone,
+          email: service.email,
+          attachmentUrl: service.attachment_url,
+        },
       };
     });
 

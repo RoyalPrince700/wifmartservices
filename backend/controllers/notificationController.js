@@ -10,6 +10,7 @@ export const getNotifications = async (req, res, next) => {
     const notifications = await Notification.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .populate('relatedId', 'title message status') // Optional: populate related data
+      .populate('fromUser', 'name profile_image isVerifiedBadge')
       .limit(50);
 
     res.status(200).json(notifications);

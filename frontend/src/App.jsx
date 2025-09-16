@@ -22,6 +22,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import ContactUs from './pages/ContactUs';
 import HelpCenter from './pages/HelpCenter';
 import BrowseCategories from './pages/BrowseCategories';
+import ProfileOptimizationGuide from './pages/ProfileOptimizationGuide';
 
 // Helper to determine if footer should be hidden
 const useHideFooterOn = (paths) => {
@@ -60,6 +61,7 @@ const App = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/help" element={<HelpCenter />} />
+        <Route path="/profile-optimization-guide" element={<ProfileOptimizationGuide />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>

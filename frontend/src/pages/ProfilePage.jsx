@@ -82,6 +82,13 @@ const ProfilePage = () => {
       navigate("/search");
       return;
     }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate(`/signin?redirect=/profile/${id}`);
+      return;
+    }
+
     setShowChat(true); // Open chat modal
   };
 
@@ -133,6 +140,19 @@ const ProfilePage = () => {
                   {provider.location_state && (
                     <p className="text-gray-600 mt-1">📍 {provider.location_state}</p>
                   )}
+
+                  {/* Get Verified Button - Mobile: Show directly under name */}
+                  {String(currentUser?._id) === String(provider._id) && !verified && (
+                    <div className="lg:hidden mt-3">
+                      <button
+                        onClick={() => navigate('/dashboard?tab=verification')}
+                        className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <HiCheckCircle className="h-5 w-5 text-blue-600" />
+                        Get Verified
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -148,12 +168,31 @@ const ProfilePage = () => {
 
               {/* Action Buttons - Responsive Layout */}
               <div className="mt-6 space-y-3">
+                {/* Get Verified Button - Desktop: Show in action buttons */}
+                {String(currentUser?._id) === String(provider._id) && !verified && (
+                  <div className="hidden lg:block">
+                    <button
+                      onClick={() => navigate('/dashboard?tab=verification')}
+                      className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                    >
+                      <HiCheckCircle className="h-5 w-5 text-blue-600" />
+                      Get Verified
+                    </button>
+                  </div>
+                )}
+
                 {/* Desktop: 2 buttons in a row */}
                 <div className="hidden lg:flex gap-3">
-                  <button onClick={handleHireClick} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    💼 Hire
-                  </button>
-                  {currentUser && String(currentUser._id) !== String(provider._id) && (
+                  {String(currentUser?._id) === String(provider._id) ? (
+                    <button onClick={() => navigate('/profile/edit')} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      ✏️ Edit Profile
+                    </button>
+                  ) : (
+                    <button onClick={handleHireClick} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      💼 Hire
+                    </button>
+                  )}
+                  {String(currentUser?._id) !== String(provider._id) && (
                     <button onClick={handleSendMessage} className="flex-1 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
                       💬 Message
                     </button>
@@ -162,10 +201,16 @@ const ProfilePage = () => {
 
                 {/* Tablet/Mobile: Stack buttons vertically */}
                 <div className="lg:hidden space-y-3">
-                  <button onClick={handleHireClick} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    💼 Hire
-                  </button>
-                  {currentUser && String(currentUser._id) !== String(provider._id) && (
+                  {String(currentUser?._id) === String(provider._id) ? (
+                    <button onClick={() => navigate('/profile/edit')} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      ✏️ Edit Profile
+                    </button>
+                  ) : (
+                    <button onClick={handleHireClick} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      💼 Hire
+                    </button>
+                  )}
+                  {String(currentUser?._id) !== String(provider._id) && (
                     <button onClick={handleSendMessage} className="w-full px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
                       💬 Message
                     </button>
@@ -260,8 +305,12 @@ const ProfilePage = () => {
 
       {/* Mobile sticky CTA */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t p-3 flex gap-3 z-40">
-        <button onClick={handleHireClick} className="flex-1 py-3 bg-blue-600 text-white rounded-lg">Hire</button>
-        {currentUser && String(currentUser._id) !== String(provider._id) && (
+        {String(currentUser?._id) === String(provider._id) ? (
+          <button onClick={() => navigate('/profile/edit')} className="flex-1 py-3 bg-blue-600 text-white rounded-lg">Edit Profile</button>
+        ) : (
+          <button onClick={handleHireClick} className="flex-1 py-3 bg-blue-600 text-white rounded-lg">Hire</button>
+        )}
+        {String(currentUser?._id) !== String(provider._id) && (
           <button onClick={handleSendMessage} className="flex-1 py-3 bg-blue-50 text-blue-700 rounded-lg">Message</button>
         )}
       </div>
@@ -305,14 +354,14 @@ const ProfilePage = () => {
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
           onClick={() => setShowImageModal(false)}
         >
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors z-10"
+            aria-label="Close image modal"
+          >
+            &times;
+          </button>
           <div className="relative max-w-4xl max-h-full">
-            <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute -top-12 right-0 text-white text-4xl hover:text-gray-300 transition-colors z-10"
-              aria-label="Close image modal"
-            >
-              &times;
-            </button>
             <img
               src={selectedPortfolioImage ? (typeof selectedPortfolioImage === 'string' ? selectedPortfolioImage : selectedPortfolioImage.url) : provider.profile_image}
               alt={selectedPortfolioImage ? `Portfolio ${selectedPortfolioIndex + 1}` : `${provider.name}'s profile picture`}

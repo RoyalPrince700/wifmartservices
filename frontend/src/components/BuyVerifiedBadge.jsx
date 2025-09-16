@@ -15,7 +15,7 @@ const BuyVerifiedBadge = () => {
       script.async = true;
       script.onload = () => {
         window.FlutterwaveCheckout({
-          public_key: process.env.REACT_APP_FLUTTERWAVE_PUBLIC_KEY,
+          public_key: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY,
           tx_ref: txRef,
           amount: amount,
           currency: 'NGN',

@@ -3,6 +3,7 @@ import Service from '../models/Service.js';
 import User from '../models/User.js';
 import Review from '../models/Review.js';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload.js';
+import { sendHireConfirmationEmail } from '../mailtrap/emails.js';
 
 export const sendHireRequest = async (req, res) => {
   try {
@@ -40,6 +41,47 @@ export const sendHireRequest = async (req, res) => {
     });
 
     await service.save();
+
+    // Send hire notification email immediately when hire request is submitted
+    console.log('🎯 Hire request submitted - attempting to send notification email...');
+    console.log('  - Service ID:', service._id);
+    console.log('  - Provider ID:', service.provider_id);
+    console.log('  - Client ID:', service.client_id);
+    
+    try {
+      console.log('🔍 Fetching populated service data for email...');
+      // Populate client and provider data for email
+      const populatedService = await Service.findById(service._id)
+        .populate('client_id', 'name email')
+        .populate('provider_id', 'name email');
+
+      console.log('📊 Populated service data for email:');
+      console.log('  - Provider:', populatedService?.provider_id);
+      console.log('  - Client:', populatedService?.client_id);
+      console.log('  - Service Title:', populatedService?.title);
+
+      if (populatedService && populatedService.provider_id && populatedService.client_id) {
+        console.log('✅ All required data available, sending hire notification email...');
+        await sendHireConfirmationEmail(
+          populatedService.provider_id.email,
+          populatedService.provider_id.name,
+          populatedService.client_id.name,
+          populatedService.title
+        );
+        console.log('✅ Hire notification email sent to:', populatedService.provider_id.email);
+      } else {
+        console.warn('⚠️  Could not send hire notification email: missing user data');
+        console.warn('  - populatedService exists:', !!populatedService);
+        console.warn('  - provider_id exists:', !!populatedService?.provider_id);
+        console.warn('  - client_id exists:', !!populatedService?.client_id);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send hire notification email:');
+      console.error('  - Error message:', emailError.message);
+      console.error('  - Error stack:', emailError.stack);
+      console.error('  - Full error:', emailError);
+      // Log the error but don't throw - hire request should continue even if email fails
+    }
 
     res.status(201).json({
       message: 'Hire request sent successfully',
@@ -175,6 +217,51 @@ export const updateHireStatus = async (req, res) => {
     // Update status
     service.status = status;
     await service.save();
+
+    // Send hire confirmation email when status changes to 'hired'
+    if (status === 'hired') {
+      console.log('🎯 Status changed to "hired" - attempting to send email notification...');
+      console.log('  - Service ID:', service._id);
+      console.log('  - Provider ID:', service.provider_id);
+      console.log('  - Client ID:', service.client_id);
+      
+      try {
+        console.log('🔍 Fetching populated service data...');
+        // Populate client and provider data for email
+        const populatedService = await Service.findById(service._id)
+          .populate('client_id', 'name email')
+          .populate('provider_id', 'name email');
+
+        console.log('📊 Populated service data:');
+        console.log('  - Provider:', populatedService?.provider_id);
+        console.log('  - Client:', populatedService?.client_id);
+        console.log('  - Service Title:', populatedService?.title);
+
+        if (populatedService && populatedService.provider_id && populatedService.client_id) {
+          console.log('✅ All required data available, sending email...');
+          await sendHireConfirmationEmail(
+            populatedService.provider_id.email,
+            populatedService.provider_id.name,
+            populatedService.client_id.name,
+            populatedService.title
+          );
+          console.log('✅ Hire confirmation email sent to:', populatedService.provider_id.email);
+        } else {
+          console.warn('⚠️  Could not send hire confirmation email: missing user data');
+          console.warn('  - populatedService exists:', !!populatedService);
+          console.warn('  - provider_id exists:', !!populatedService?.provider_id);
+          console.warn('  - client_id exists:', !!populatedService?.client_id);
+        }
+      } catch (emailError) {
+        console.error('❌ Failed to send hire confirmation email:');
+        console.error('  - Error message:', emailError.message);
+        console.error('  - Error stack:', emailError.stack);
+        console.error('  - Full error:', emailError);
+        // Log the error but don't throw - hire process should continue even if email fails
+      }
+    } else {
+      console.log('ℹ️  Status changed to:', status, '- no email notification needed');
+    }
 
     res.status(200).json({
       message: 'Status updated successfully',

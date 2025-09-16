@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-const ProfileOverview = ({ user }) => {
+const ProfileOverview = ({ user, setActiveTab }) => {
   const navigate = useNavigate();
 
   // Profile completion progress bar
@@ -15,7 +15,34 @@ const ProfileOverview = ({ user }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 md:p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3">Profile Overview</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-gray-800">Profile Overview</h3>
+
+        {/* Get Verified Button - only show if not verified */}
+        {!(user?.isVerifiedBadge === true ||
+            user?.isVerified === true ||
+            user?.verification_status?.toLowerCase() === 'approved') && setActiveTab && (
+          <button
+            onClick={() => setActiveTab('verification')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+            title="Get verified badge"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Get Verified
+          </button>
+        )}
+      </div>
       {user ? (
         <div className="space-y-4">
           <div className="flex flex-col items-center text-center">
@@ -35,8 +62,8 @@ const ProfileOverview = ({ user }) => {
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-lg font-semibold text-gray-800">{user.name}</h2>
               {/* ✅ Verified Badge for current user */}
-              {(user?.isVerifiedBadge === true || 
-                user?.isVerified === true || 
+              {(user?.isVerifiedBadge === true ||
+                user?.isVerified === true ||
                 user?.verification_status?.toLowerCase() === 'approved') && (
                 <span className="flex-shrink-0 bg-blue-500 text-white rounded-full p-1.5 shadow-md flex items-center justify-center">
                   <svg

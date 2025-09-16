@@ -7,6 +7,7 @@ import {
   deleteService,
   getAllPortfolios,
   deletePortfolio,
+  getVerifiedUsers,
   getStats,
 
   // CAC Verification
@@ -38,6 +39,9 @@ router.delete('/services/:id', deleteService);
 // === PORTFOLIOS ===
 router.get('/portfolios', getAllPortfolios);
 router.delete('/portfolios/:id', deletePortfolio);
+
+// === VERIFIED USERS ===
+router.get('/verified-users', getVerifiedUsers);
 
 // === CAC VERIFICATION ===
 router.get('/cac-requests', getCACRequests);

@@ -244,7 +244,10 @@ const ProfileEdit = ({ setActiveTab }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Profile Picture (Circular with +) */}
         <div className="text-center">
-          <label className="block text-sm font-medium text-gray-700 mb-3">Profile Picture</label>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Profile Picture
+            <span className="text-red-500 ml-1">*</span>
+          </label>
           <div className="relative inline-block">
             <div
               className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 shadow-sm cursor-pointer hover:shadow"
@@ -291,6 +294,9 @@ const ProfileEdit = ({ setActiveTab }) => {
             >
               Remove
             </button>
+          )}
+          {!formData.profile_image && !user?.profile_image && (
+            <p className="text-xs text-red-500 mt-2">Profile picture is required</p>
           )}
         </div>
 
@@ -686,11 +692,11 @@ const ProfileEdit = ({ setActiveTab }) => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading}
-          className={`w-full py-3 px-6 font-semibold rounded-lg transition-all duration-300 
+          disabled={loading || (!formData.profile_image && !user?.profile_image)}
+          className={`w-full py-3 px-6 font-semibold rounded-lg transition-all duration-300
             flex items-center justify-center text-white
-            ${loading 
-              ? 'bg-blue-500 cursor-not-allowed opacity-75' 
+            ${loading || (!formData.profile_image && !user?.profile_image)
+              ? 'bg-blue-500 cursor-not-allowed opacity-75'
               : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800'
             }`}
         >
@@ -718,6 +724,8 @@ const ProfileEdit = ({ setActiveTab }) => {
               </svg>
               Saving Profile...
             </>
+          ) : (!formData.profile_image && !user?.profile_image) ? (
+            'Please Add Profile Picture'
           ) : (
             'Save Profile'
           )}

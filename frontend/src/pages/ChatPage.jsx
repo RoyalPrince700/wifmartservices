@@ -148,22 +148,10 @@ const ChatPage = () => {
 
     try {
       setIsSending(true);
-      const sentMsg = await sendMessage(selectedChat._id, newMessage);
-
-      const socket = getSocket();
-      if (socket && socket.connected && currentUser) {
-        const chatRoomId = getChatRoomId(currentUser._id, selectedChat._id);
-        socket.emit('send-message', {
-          chatId: chatRoomId,
-          message: sentMsg.message,
-          senderId: sentMsg.senderId._id || sentMsg.senderId,
-          receiverId: sentMsg.receiverId._id || sentMsg.receiverId,
-          timestamp: sentMsg.timestamp,
-          messageId: sentMsg._id,
-        });
-      }
-
-      setMessages((prev) => [...prev, { ...sentMsg, delivered: false }]);
+      await sendMessage(selectedChat._id, newMessage);
+      
+      // Don't add message to state here - let the socket listener handle it
+      // This prevents double messages
       setNewMessage('');
       // Focus input after send
       inputRef.current?.focus();
@@ -185,6 +173,24 @@ const ChatPage = () => {
     loadConversations();
   }, []);
 
+  // Handle new messages from socket
+  const handleNewMessage = (msg) => {
+    console.log('New message received:', msg);
+    if (!selectedChat) return;
+    
+    if ([msg.senderId._id, msg.receiverId._id].includes(selectedChat._id)) {
+      setMessages((prev) => {
+        // More robust duplicate prevention
+        if (prev.some((m) => m._id === msg._id)) {
+          console.log('Duplicate message detected, skipping:', msg._id);
+          return prev;
+        }
+        return [...prev, msg];
+      });
+    }
+    loadConversations(); // Update last message in list
+  };
+
   // Real-time message handling
   useEffect(() => {
     if (!currentUser || !selectedChat) return;
@@ -204,17 +210,6 @@ const ChatPage = () => {
       console.log('Socket not connected yet...');
       return;
     }
-
-    const handleNewMessage = (msg) => {
-      console.log('New message received:', msg);
-      if ([msg.senderId._id, msg.receiverId._id].includes(selectedChat._id)) {
-        setMessages((prev) => {
-          if (prev.some((m) => m._id === msg._id)) return prev;
-          return [...prev, msg];
-        });
-      }
-      loadConversations(); // Update last message in list
-    };
 
     const cleanup = setupChatPageListeners(socket, selectedChat, handleNewMessage);
     return () => cleanup();
@@ -408,7 +403,9 @@ const ChatPage = () => {
                   onKeyDown={(e) => {
                     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                       e.preventDefault();
-                      handleSend(e);
+                      if (!isSending && newMessage.trim()) {
+                        handleSend(e);
+                      }
                     }
                   }}
                   placeholder="Type a message... (Ctrl/⌘+Enter to send)"

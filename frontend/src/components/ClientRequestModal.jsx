@@ -1,20 +1,30 @@
 import { useState } from 'react';
 
 const ClientRequestModal = ({ client, onClose }) => {
-  // Destructure client data
-  const { name, profile_image, requestDetails: rawRequestDetails } = client;
+  // Support both client and provider shapes and nested request objects
+  const safeClient = client || {};
+  const name = safeClient.name || safeClient.client_id?.name || 'Unknown';
+  const profile_image = safeClient.profile_image || safeClient.client_id?.profile_image;
 
-  // Normalize requestDetails to handle both snake_case and camelCase
+  // Prefer nested requestDetails/request/request_data if present
+  const request =
+    safeClient.requestDetails ||
+    safeClient.request_details ||
+    safeClient.request ||
+    safeClient.request_data ||
+    safeClient; // fallback to flat fields on object
+
+  // Normalize keys between camelCase and snake_case
   const requestDetails = {
-  title: client.title,
-  budget: client.budget,
-  event_date: client.event_date,
-  location: client.location,
-  phone: client.phone,
-  email: client.email,
-  message: client.message,
-  attachment_url: client.attachment_url,
-};
+    title: request.title || request.project || '',
+    budget: request.budget || '',
+    eventDate: request.eventDate || request.event_date || '',
+    location: request.location || '',
+    phone: request.phone || request.phone_number || '',
+    email: request.email || '',
+    message: request.message || request.note || '',
+    attachmentUrl: request.attachmentUrl || request.attachment_url || request.attachment || '',
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-screen overflow-y-auto">

@@ -4,6 +4,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
+import { sendWelcomeEmail } from '../mailtrap/emails.js';
 
 dotenv.config();
 
@@ -23,15 +24,36 @@ passport.use(
 
         // Find or create user
         let user = await User.findOne({ googleId: profile.id });
+        let isNewUser = false;
         if (!user) {
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName || 'Unknown',
             email: profile.emails[0].value,
           });
+          isNewUser = true;
           console.log('New user created:', user.email);
         } else {
           console.log('Existing user found:', user.email);
+        }
+
+        // Send welcome email to new users (don't block OAuth flow if email fails)
+        if (isNewUser) {
+          console.log('🎉 New user detected - attempting to send welcome email...');
+          console.log('  - User Email:', user.email);
+          console.log('  - User Name:', user.name);
+          try {
+            await sendWelcomeEmail(user.email, user.name);
+            console.log('✅ Welcome email sent to:', user.email);
+          } catch (emailError) {
+            console.error('❌ Failed to send welcome email:');
+            console.error('  - Error message:', emailError.message);
+            console.error('  - Error stack:', emailError.stack);
+            console.error('  - Full error:', emailError);
+            // Don't throw error - OAuth should continue even if email fails
+          }
+        } else {
+          console.log('ℹ️  Existing user - no welcome email needed');
         }
 
         // Validate JWT_SECRET

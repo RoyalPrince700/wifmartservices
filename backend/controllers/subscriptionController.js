@@ -3,6 +3,11 @@ import User from '../models/User.js';
 import Subscription from '../models/Subscription.js';
 import 'dotenv/config'; // ← Ensures process.env is loaded
 
+// 🔍 Debug: Log environment variables on server start
+console.log("🔑 Backend Flutterwave Secret Key:", process.env.FLUTTERWAVE_SECRET_KEY ? "✅ Loaded" : "❌ Missing");
+console.log("🔑 Backend JWT Secret:", process.env.JWT_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log("🔑 Backend MongoDB URI:", process.env.MONGODB_URI ? "✅ Loaded" : "❌ Missing");
+
 // ✅ Add this missing function
 export const initiateBadgePayment = async (req, res) => {
   const { plan } = req.body;

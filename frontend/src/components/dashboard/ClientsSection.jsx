@@ -2,7 +2,7 @@ import { DashboardCard } from './UIComponents';
 import toast from 'react-hot-toast';
 import Loading from '../Loading';
 
-const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdateStatus }) => {
+const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdateStatus, onMessage }) => {
   return (
     <DashboardCard title="Requests to Hire You">
       {loading ? (
@@ -37,8 +37,8 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                 key={req._id}
                 className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
               >
-                {/* Mobile Layout */}
-                <div className="block sm:hidden p-4">
+                {/* Mobile Layout - Improved responsiveness */}
+                <div className="block md:hidden p-4">
                   <div className="flex items-start space-x-3">
                     {/* Avatar */}
                     <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-blue-500 to-teal-400 rounded-full flex items-center justify-center shadow-sm">
@@ -46,7 +46,7 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                         {req.client_id?.name?.charAt(0).toUpperCase() || 'C'}
                       </span>
                     </div>
-                    
+
                     {/* Name and Title */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
@@ -77,48 +77,56 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                     </div>
                   </div>
 
-                  {/* Job Details */}
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-500">
-                    {req.location && <span>📍 {req.location}</span>}
-                    {req.event_date && (
-                      <span>📅 {new Date(req.event_date).toLocaleDateString()}</span>
-                    )}
-                    {req.budget && <span>💰 {req.budget}</span>}
-                  </div>
+                  {/* Actions - Responsive button layout */}
+                  <div className="mt-4">
+                    {/* Mobile layout: View Details + Pending side by side, Message below */}
+                    <div className="block sm:hidden space-y-2">
+                      {/* View Details and Pending dropdown side by side */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setSelectedClient(req)}
+                          className="flex-1 px-3 py-2.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-200 active:scale-95"
+                        >
+                          View Details
+                        </button>
+                        <div className="flex-1">
+                          <select
+                            value={req.status || 'pending'}
+                            onChange={(e) => {
+                              const newStatus = e.target.value;
+                              const id = req.id;
+                              if (!id) {
+                                console.error('❌ No ID found for request:', req);
+                                toast.error('Cannot update: missing ID');
+                                return;
+                              }
+                              handleUpdateStatus(id, newStatus);
+                            }}
+                            className="w-full px-3 py-2.5 text-xs font-medium rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+                            style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}
+                          >
+                            <option value="pending">⏳ Pending</option>
+                            <option value="accepted">✅ Accepted</option>
+                            <option value="rejected">❌ Rejected</option>
+                            <option value="hired">💼 Hired</option>
+                            <option value="completed">🎉 Completed</option>
+                          </select>
+                        </div>
+                      </div>
 
-                  {/* Actions */}
-                  <div className="mt-3 flex space-x-2">
-                    <button
-                      onClick={() => setSelectedClient(req)}
-                      className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-200"
-                    >
-                      View Details
-                    </button>
-                    <select
-                      value={req.status || 'pending'}
-                      onChange={(e) => {
-                        const newStatus = e.target.value;
-                        const id = req.id;
-                        if (!id) {
-                          console.error('❌ No ID found for request:', req);
-                          toast.error('Cannot update: missing ID');
-                          return;
-                        }
-                        handleUpdateStatus(id, newStatus);
-                      }}
-                      className="flex-1 px-2 py-2 text-xs font-medium rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="hired">Hired</option>
-                      <option value="completed">Completed</option>
-                    </select>
+                      {/* Message button below */}
+                      <button
+                        onClick={() => onMessage(req.client_id)}
+                        className="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors active:scale-95"
+                      >
+                        Message
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Desktop Layout */}
-                <div className="hidden sm:block p-5">
+                <div className="hidden md:block p-5">
                   <div className="flex items-center justify-between">
                     {/* Left: Avatar, Name, Title */}
                     <div className="flex items-center space-x-4 flex-1 min-w-0">
@@ -157,16 +165,8 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                       </div>
                     </div>
 
-                    {/* Center: Job Details */}
-                    <div className="flex-1 mx-6">
-                      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                        {req.location && <span>📍 {req.location}</span>}
-                        {req.event_date && (
-                          <span>📅 {new Date(req.event_date).toLocaleDateString()}</span>
-                        )}
-                        {req.budget && <span>💰 {req.budget}</span>}
-                      </div>
-                    </div>
+                    {/* Center: (Hidden per requirements) */}
+                    <div className="flex-1 mx-6" />
 
                     {/* Right: Actions */}
                     <div className="flex items-center space-x-3">
@@ -175,6 +175,12 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                         className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors border border-gray-200"
                       >
                         View Details
+                      </button>
+                      <button
+                        onClick={() => onMessage(req.client_id)}
+                        className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Message
                       </button>
                       <select
                         value={req.status || 'pending'}

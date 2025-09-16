@@ -1,6 +1,6 @@
 // frontend/src/pages/Dashboard.jsx
 import { useEffect, useState, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { HiLogout } from 'react-icons/hi';
 
 // ✅ Import named functions
@@ -16,6 +16,7 @@ import {
 import { AuthContext } from '../../src/contexts/AuthContext';
 import toast from 'react-hot-toast'; // ✅ Don't forget this!
 import ClientRequestModal from '../components/ClientRequestModal';
+import ChatWindow from '../components/ChatWindow';
 
 // Import extracted components
 import ProfileOverview from '../components/dashboard/ProfileOverview';
@@ -36,16 +37,19 @@ const normalizeId = (id) => {
 const Dashboard = () => {
   const { user, token, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [hiredProviders, setHiredProviders] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [hireRequests, setHireRequests] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [selectedProviderRequest, setSelectedProviderRequest] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const userMenuRef = useRef(null);
+  const [chatUser, setChatUser] = useState(null);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -209,15 +213,17 @@ const handleLeaveReview = (serviceId) => {
             loading={loading}
             setSelectedClient={setSelectedClient}
             handleUpdateStatus={handleUpdateStatus}
+            onMessage={(user) => setChatUser(user)}
           />
         );
 
       case 'verification':
         return (
-          <VerificationSection 
+          <VerificationSection
             user={user}
             handleBuyBadge={handleBuyBadge}
             handleRenewBadge={handleRenewBadge}
+            paymentLoading={paymentLoading}
           />
         );
 
@@ -229,7 +235,13 @@ const handleLeaveReview = (serviceId) => {
 
 
 const handleBuyBadge = async (plan) => {
+  setPaymentLoading(true);
   try {
+    // 🔍 Debug: Check environment variables
+    console.log("🌍 Environment Variables Check:");
+    console.log("  - API Base URL:", import.meta.env.VITE_API_BASE_URL);
+    console.log("  - Flutterwave Public Key:", import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ? "✅ Loaded" : "❌ Missing");
+
     // ✅ Step 1: Get real txRef from backend
     const { txRef, amount, customer } = await initiateBadgePayment(plan);
     console.log("🚀 Generated txRef:", txRef); // Should be "badge_..."
@@ -241,6 +253,7 @@ const handleBuyBadge = async (plan) => {
 
     script.onload = () => {
       console.log("⚡ Flutterwave loaded");
+      console.log("🔑 Frontend Flutterwave Public Key:", import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY);
 
       window.FlutterwaveCheckout({
         public_key: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY,
@@ -274,22 +287,27 @@ const handleBuyBadge = async (plan) => {
   } catch (err) {
     console.error("❌ Verification error:", err);
     toast.error('Could not verify payment. Contact support.');
+  } finally {
+    setPaymentLoading(false);
   }
 },
         onclose: () => {
           console.log("Modal closed");
+          setPaymentLoading(false);
         },
       });
     };
 
     script.onerror = () => {
       toast.error("Failed to load payment gateway");
+      setPaymentLoading(false);
     };
 
     document.body.appendChild(script);
   } catch (error) {
     console.error("💥 Payment initiation failed:", error);
     toast.error(error.message || "Payment setup failed");
+    setPaymentLoading(false);
   }
 };
 
@@ -400,7 +418,7 @@ const handleRenewBadge = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left Column - Profile Overview (visible on all tabs) */}
           <div className="md:col-span-1 space-y-6">
-            <ProfileOverview user={user} />
+            <ProfileOverview user={user} setActiveTab={setActiveTab} />
 
          
 
@@ -417,19 +435,45 @@ const handleRenewBadge = () => {
         </div>
       </main>
       {selectedClient && (
-  <ClientRequestModal
-    client={selectedClient}
-    onClose={() => setSelectedClient(null)}
-  />
-)}
-{/* View Provider Request Details */}
+        <ClientRequestModal
+          client={selectedClient}
+          onClose={() => setSelectedClient(null)}
+        />
+      )}
+      {/* View Provider Request Details */}
 
-{selectedProviderRequest && (
-  <ClientRequestModal
-    client={selectedProviderRequest}
-    onClose={() => setSelectedProviderRequest(null)}
-  />
-)}
+      {selectedProviderRequest && (
+        <ClientRequestModal
+          client={selectedProviderRequest}
+          onClose={() => setSelectedProviderRequest(null)}
+        />
+      )}
+      {chatUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start md:items-center justify-center z-50 p-2 md:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full md:max-w-md h-[85vh] md:h-auto max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b sticky top-0 bg-white z-10">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">{chatUser?.name || 'Chat'}</h3>
+                <button onClick={() => setChatUser(null)} className="text-gray-500 text-2xl hover:text-gray-700">&times;</button>
+              </div>
+              <div className="mt-2">
+                <button
+                  onClick={() => {
+                    setChatUser(null);
+                    navigate('/chat');
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  Open Full Chat
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ChatWindow otherUser={chatUser} onClose={() => setChatUser(null)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

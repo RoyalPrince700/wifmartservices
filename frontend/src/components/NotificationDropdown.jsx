@@ -2,7 +2,7 @@
 import { useEffect, useLayoutEffect, useState, useRef, useContext } from 'react';
 import { getNotifications, markAsRead } from '../services/api';
 import { formatDistanceToNow } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getSocket } from '../services/socket';
 import { AuthContext } from '../contexts/AuthContext';
 import Loading from './Loading';
@@ -12,6 +12,7 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -25,17 +26,49 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
     }
   };
 
-  const handleNotificationClick = async (notification) => {
-    if (!notification.read) {
-      try {
-        await markAsRead(notification._id);
-        setNotifications((prev) =>
-          prev.map((n) => (n._id === notification._id ? { ...n, read: true } : n))
-        );
-      } catch (err) {
-        console.error('Failed to mark as read');
+  const handleNotificationClick = async (notificationOrGroup) => {
+    const idsToMark = Array.isArray(notificationOrGroup.ids)
+      ? notificationOrGroup.ids
+      : [notificationOrGroup._id];
+
+    try {
+      // Sequentially mark to reuse existing endpoint
+      for (const id of idsToMark) {
+        const target = notifications.find((n) => n._id === id);
+        if (target && !target.read) {
+          await markAsRead(id);
+        }
       }
+      setNotifications((prev) =>
+        prev.map((n) => (idsToMark.includes(n._id) ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      console.error('Failed to mark as read');
     }
+
+    // Navigate based on notification type
+    const notificationType = notificationOrGroup.type === 'message_group' 
+      ? 'message' 
+      : notificationOrGroup.type;
+
+    switch (notificationType) {
+      case 'message':
+        navigate('/chat');
+        break;
+      case 'hire_request':
+        navigate('/dashboard?tab=clients');
+        break;
+      case 'hire_accepted':
+        navigate('/dashboard?tab=providers');
+        break;
+      case 'verification_approved':
+        navigate('/dashboard?tab=verification');
+        break;
+      default:
+        // For other notification types, stay on current page
+        break;
+    }
+
     onClose();
   };
 
@@ -71,6 +104,7 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
         message: notificationData.message,
         createdAt: notificationData.timestamp || new Date(),
         read: false,
+        fromUser: notificationData.fromUser || undefined,
       };
       setNotifications(prev => [newNotification, ...prev]);
     };
@@ -133,6 +167,48 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
 
   if (!isOpen) return null;
 
+  // Group notifications: messages grouped by fromUser, others as-is
+  const grouped = (() => {
+    const groups = [];
+    const messageGroupsBySender = new Map();
+
+    for (const n of notifications) {
+      if (n.type === 'message' && n.fromUser?._id) {
+        const key = n.fromUser._id;
+        if (!messageGroupsBySender.has(key)) {
+          messageGroupsBySender.set(key, {
+            _id: `group_${key}`,
+            type: 'message_group',
+            fromUser: n.fromUser,
+            latestMessage: n.message,
+            createdAt: n.createdAt,
+            count: 0,
+            anyUnread: false,
+            ids: [],
+          });
+        }
+        const g = messageGroupsBySender.get(key);
+        g.count += 1;
+        g.anyUnread = g.anyUnread || !n.read;
+        g.ids.push(n._id);
+        // Keep latest timestamp/message at top
+        if (new Date(n.createdAt) > new Date(g.createdAt)) {
+          g.createdAt = n.createdAt;
+          g.latestMessage = n.message;
+        }
+      } else {
+        groups.push(n);
+      }
+    }
+
+    // Merge message groups
+    groups.push(...Array.from(messageGroupsBySender.values()));
+
+    // Sort by createdAt desc
+    groups.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return groups;
+  })();
+
   return (
     <div
       ref={dropdownRef}
@@ -159,11 +235,11 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
           <div className="p-4 text-center">
             <Loading variant="spinner" size="sm" color="blue" text="Loading notifications..." />
           </div>
-        ) : notifications.length === 0 ? (
+        ) : grouped.length === 0 ? (
           <p className="p-4 text-center text-gray-500">No notifications yet.</p>
         ) : (
           <ul>
-            {notifications.slice(0, 10).map((notif) => (
+            {grouped.slice(0, 10).map((notif) => (
               <li key={notif._id}>
                 <button
                   onClick={(e) => {
@@ -171,15 +247,19 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
                     handleNotificationClick(notif);
                   }}
                   className={`w-full text-left p-4 hover:bg-gray-50 transition flex items-start gap-3 ${
-                    notif.read ? 'bg-white' : 'bg-blue-50 font-medium'
+                    notif.type === 'message_group'
+                      ? (notif.anyUnread ? 'bg-blue-50 font-medium' : 'bg-white')
+                      : (notif.read ? 'bg-white' : 'bg-blue-50 font-medium')
                   }`}
                 >
                   <div
                     className={`p-2 rounded-full text-sm ${
-                      notif.read ? 'bg-gray-200' : 'bg-blue-600'
+                      notif.type === 'message_group'
+                        ? (notif.anyUnread ? 'bg-blue-600' : 'bg-gray-200')
+                        : (notif.read ? 'bg-gray-200' : 'bg-blue-600')
                     }`}
                   >
-                    {notif.type === 'message'
+                    {notif.type === 'message' || notif.type === 'message_group'
                       ? '💬'
                       : notif.type === 'hire_request'
                       ? '📩'
@@ -190,11 +270,23 @@ const NotificationDropdown = ({ isOpen, onClose, parentRef }) => {
                       : '🔔'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-tight truncate">{notif.message}</p>
+                    {notif.type === 'message_group' ? (
+                      <p className="text-sm text-gray-800 leading-tight truncate">
+                        {notif.fromUser?.name ? `${notif.fromUser.name}` : 'Messages'}
+                        {` · ${notif.count} message${notif.count > 1 ? 's' : ''}`}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-800 leading-tight truncate">{notif.message}</p>
+                    )}
                     <p className="text-xs text-gray-500 mt-1">
                       {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
                     </p>
                   </div>
+                  {notif.type === 'message_group' && notif.anyUnread && (
+                    <span className="text-xs bg-blue-600 text-white rounded-full px-2 py-0.5 self-center">
+                      {notif.count}
+                    </span>
+                  )}
                 </button>
               </li>
             ))}

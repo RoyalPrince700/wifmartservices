@@ -2,6 +2,8 @@
 import User from '../models/User.js';
 import Service from '../models/Service.js';
 import Portfolio from '../models/Portfolio.js';
+import ChatMessage from '../models/ChatMessage.js';
+import { sendBadgeVerificationEmail } from '../mailtrap/emails.js';
 
 // === USERS ===
 export const getAllUsers = async (req, res, next) => {
@@ -207,6 +209,15 @@ export const approveBadge = async (req, res, next) => {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    // Send badge verification email
+    try {
+      await sendBadgeVerificationEmail(user.email, user.name);
+      console.log('Badge verification email sent to:', user.email);
+    } catch (emailError) {
+      console.error('Failed to send badge verification email:', emailError);
+      // Don't throw error - badge approval should continue even if email fails
+    }
+
     res.json({ message: 'Badge verification approved', user });
   } catch (error) {
     next(error);
@@ -233,6 +244,30 @@ export const rejectBadge = async (req, res, next) => {
   }
 };
 
+// === VERIFIED USERS ===
+export const getVerifiedUsers = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const verifiedUsers = await User.find({ verification_status: 'Approved' })
+      .select('name email skills profile_completion verification_status created_at')
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit))
+      .sort({ created_at: -1 });
+
+    const total = await User.countDocuments({ verification_status: 'Approved' });
+
+    res.json({
+      users: verifiedUsers,
+      total,
+      page: Number(page),
+      limit: Number(limit)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // === STATS ===
 export const getStats = async (req, res, next) => {
   try {
@@ -240,15 +275,17 @@ export const getStats = async (req, res, next) => {
     const totalServices = await Service.countDocuments();
     const totalPortfolios = await Portfolio.countDocuments();
 
-    const pendingCAC = await User.countDocuments({ cac_status: 'Pending Verification' });
-    const pendingBadge = await User.countDocuments({ verification_status: 'Pending' });
-    const pendingVerifications = pendingCAC + pendingBadge; // For dashboard overview
+    const totalVerifiedUsers = await User.countDocuments({ verification_status: 'Approved' });
+
+    // Count active conversations (distinct chatId with at least one message)
+    const totalConversations = await ChatMessage.distinct('chatId').then(chatIds => chatIds.length);
 
     res.json({
       totalUsers,
       totalServices,
       totalPortfolios,
-      pendingVerifications // Shown in stats card
+      totalVerifiedUsers,
+      totalConversations
     });
   } catch (error) {
     next(error);

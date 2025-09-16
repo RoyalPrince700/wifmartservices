@@ -187,31 +187,6 @@ const Navbar = () => {
   </div>
 )}
 
-{/* Mobile: Notification Bell with Dropdown */}
-{token && (
-  <div className="md:hidden flex items-center">
-    <div className="relative" ref={bellRef}>
-      <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="group p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg transition-all duration-300 transform hover:scale-110 hover:-translate-y-0.5 shadow-sm hover:shadow-md relative"
-        aria-label="Notifications"
-      >
-        <HiBell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
-
-      <NotificationDropdown
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-        parentRef={bellRef}
-      />
-    </div>
-  </div>
-)}
             </div>
 
             {/* Right: Auth Button (Desktop) */}
@@ -236,26 +211,18 @@ const Navbar = () => {
             {/* Mobile: Notification Bell or Search Input */}
             <div className="md:hidden flex items-center">
               {token ? (
-                <div className="relative" ref={bellRef}>
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="group p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg transition-all duration-300 transform hover:scale-110 hover:-translate-y-0.5 shadow-sm hover:shadow-md relative"
-                    aria-label="Notifications"
-                  >
-                    <HiBell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    )}
-                  </button>
-
-                  <NotificationDropdown
-                    isOpen={showNotifications}
-                    onClose={() => setShowNotifications(false)}
-                    parentRef={bellRef}
-                  />
-                </div>
+                <Link
+                  to="/notifications"
+                  className="group p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg transition-all duration-300 transform hover:scale-110 hover:-translate-y-0.5 shadow-sm hover:shadow-md relative"
+                  aria-label="Notifications"
+                >
+                  <HiBell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold shadow-lg animate-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
               ) : (
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

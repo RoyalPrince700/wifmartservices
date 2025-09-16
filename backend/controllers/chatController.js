@@ -3,6 +3,7 @@
 import ChatMessage from '../models/ChatMessage.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import { sendFirstMessageEmail } from '../mailtrap/emails.js';
 
 /**
  * Start a chat with another user
@@ -161,6 +162,10 @@ export const sendMessage = async (req, res, next) => {
     // Generate chatId
     const chatId = [senderId.toString(), receiverId].sort().join('_');
 
+    // Check if this is the first message between these two users
+    const existingMessages = await ChatMessage.countDocuments({ chatId });
+    const isFirstMessage = existingMessages === 0;
+
     // Create and save message
     const newMessage = new ChatMessage({
       chatId,
@@ -189,6 +194,7 @@ export const sendMessage = async (req, res, next) => {
         // Create notification with metadata
         const notification = new Notification({
           user: receiverId,
+          fromUser: senderId,
           type: 'message',
           message: `New message from ${sender.name}`,
           relatedId: populatedMessage._id,
@@ -208,7 +214,39 @@ export const sendMessage = async (req, res, next) => {
           message: `New message from ${sender.name}`,
           id: notification._id,
           timestamp: notification.createdAt,
+          fromUser: {
+            _id: senderId,
+            name: sender.name,
+          },
         });
+
+        // Send email notification only for first message between users
+        if (isFirstMessage) {
+          try {
+            console.log('📧 Sending first message email notification...');
+            console.log('  - First message between users:', sender.name, 'and', receiver.name);
+            
+            // Create message preview (first 100 characters)
+            const messagePreview = message.trim().length > 100 
+              ? message.trim().substring(0, 100) + '...'
+              : message.trim();
+
+            // Send email notification
+            await sendFirstMessageEmail(
+              receiver.email,
+              receiver.name,
+              sender.name,
+              messagePreview
+            );
+            
+            console.log('✅ First message email notification sent successfully');
+          } catch (emailError) {
+            console.error('❌ Error sending first message email notification:', emailError);
+            // Don't fail the message send if email notification fails
+          }
+        } else {
+          console.log('📧 Skipping email notification - not first message between users');
+        }
 
       } catch (notificationError) {
         console.error('Error creating notification:', notificationError);

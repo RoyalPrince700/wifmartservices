@@ -14,6 +14,7 @@ import {
   deleteAdminService,
   getAdminPortfolios,
   deleteAdminPortfolio,
+  getVerifiedUsers,
   getCACRequests,
   approveCACVerification,
   rejectCACVerification,
@@ -55,18 +56,21 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState([]);
   const [portfolios, setPortfolios] = useState([]);
+  const [verifiedUsers, setVerifiedUsers] = useState([]);
   const [cacRequests, setCACRequests] = useState([]);
   const [badgeRequests, setBadgeRequests] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalServices: 0,
     totalPortfolios: 0,
-    pendingVerifications: 0,
+    totalVerifiedUsers: 0,
+    totalConversations: 0,
   });
   const [loading, setLoading] = useState(true);
   const [userPage, setUserPage] = useState(1);
   const [servicePage, setServicePage] = useState(1);
   const [portfolioPage, setPortfolioPage] = useState(1);
+  const [verifiedPage, setVerifiedPage] = useState(1);
   const [cacPage, setCACPage] = useState(1);
   const [badgePage, setBadgePage] = useState(1);
   const [userFilter, setUserFilter] = useState('');
@@ -75,6 +79,7 @@ const AdminDashboard = () => {
   const [userTotal, setUserTotal] = useState(0);
   const [serviceTotal, setServiceTotal] = useState(0);
   const [portfolioTotal, setPortfolioTotal] = useState(0);
+  const [verifiedTotal, setVerifiedTotal] = useState(0);
   const [cacTotal, setCACTotal] = useState(0);
   const [badgeTotal, setBadgeTotal] = useState(0);
 
@@ -95,6 +100,7 @@ const AdminDashboard = () => {
         fetchData(getAdminUsers, setUsers, setUserTotal, userPage, userFilter),
         fetchData(getAdminServices, setServices, setServiceTotal, servicePage, serviceFilter),
         fetchData(getAdminPortfolios, setPortfolios, setPortfolioTotal, portfolioPage),
+        fetchData(getVerifiedUsers, setVerifiedUsers, setVerifiedTotal, verifiedPage),
         fetchData(getCACRequests, setCACRequests, setCACTotal, cacPage),
         fetchData(getBadgeRequests, setBadgeRequests, setBadgeTotal, badgePage),
         getAdminStats().then(setStats),
@@ -112,6 +118,7 @@ const AdminDashboard = () => {
     userPage,
     servicePage,
     portfolioPage,
+    verifiedPage,
     cacPage,
     badgePage,
     userFilter,
@@ -243,7 +250,7 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           <div className="bg-white p-4 shadow-md rounded-md text-center">
             <h2 className="text-xl font-semibold">Total Users</h2>
             <p className="text-3xl">{stats.totalUsers}</p>
@@ -257,8 +264,12 @@ const AdminDashboard = () => {
             <p className="text-3xl">{stats.totalPortfolios}</p>
           </div>
           <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Pending Verifications</h2>
-            <p className="text-3xl">{stats.pendingVerifications}</p>
+            <h2 className="text-xl font-semibold">Verified Users</h2>
+            <p className="text-3xl">{stats.totalVerifiedUsers}</p>
+          </div>
+          <div className="bg-white p-4 shadow-md rounded-md text-center">
+            <h2 className="text-xl font-semibold">Active Conversations</h2>
+            <p className="text-3xl">{stats.totalConversations}</p>
           </div>
         </div>
 
@@ -269,7 +280,7 @@ const AdminDashboard = () => {
             <Tab>Services</Tab>
             <Tab>Portfolios</Tab>
             <Tab>CAC Verification</Tab>
-            <Tab>Badge Verification</Tab>
+            <Tab>Verified Users</Tab>
           </TabList>
 
           {/* === USERS TAB === */}
@@ -508,54 +519,45 @@ const AdminDashboard = () => {
             <Pagination currentPage={cacPage} total={cacTotal} setPage={setCACPage} />
           </TabPanel>
 
-          {/* === BADGE VERIFICATION TAB === */}
+          {/* === VERIFIED USERS TAB === */}
           <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">Badge Verification Requests</h2>
+            <h2 className="text-2xl font-bold mb-4">Verified Users with Badges</h2>
             <table className="min-w-full bg-white shadow-md rounded-md">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-2 text-left">User</th>
                   <th className="px-4 py-2 text-left">Skills</th>
                   <th className="px-4 py-2 text-left">Profile Completion</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
+                  <th className="px-4 py-2 text-left">Verified Date</th>
                 </tr>
               </thead>
               <tbody>
-                {badgeRequests.length > 0 ? (
-                  badgeRequests.map((req) => (
-                    <tr key={req._id} className="border-t hover:bg-gray-50">
+                {verifiedUsers.length > 0 ? (
+                  verifiedUsers.map((user) => (
+                    <tr key={user._id} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-2">
-                        <p className="font-medium">{req.name}</p>
-                        <p className="text-sm text-gray-500">{req.email}</p>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
                       </td>
-                      <td className="px-4 py-2">{req.skills.join(', ')}</td>
-                      <td className="px-4 py-2">{req.profile_completion}%</td>
-                      <td className="px-4 py-2 space-y-2">
-                        <button
-                          onClick={() => handleApproveBadge(req._id)}
-                          className="block w-full text-left text-green-500 hover:text-green-700"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleRejectBadge(req._id)}
-                          className="block w-full text-left text-red-500 hover:text-red-700"
-                        >
-                          Reject
-                        </button>
+                      <td className="px-4 py-2">
+                        {Array.isArray(user.skills) ? user.skills.join(', ') : user.skills || 'N/A'}
+                      </td>
+                      <td className="px-4 py-2">{user.profile_completion}%</td>
+                      <td className="px-4 py-2">
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td colSpan="4" className="text-center py-6 text-gray-500">
-                      No pending badge requests
+                      No verified users found
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-            <Pagination currentPage={badgePage} total={badgeTotal} setPage={setBadgePage} />
+            <Pagination currentPage={verifiedPage} total={verifiedTotal} setPage={setVerifiedPage} />
           </TabPanel>
         </Tabs>
       </div>

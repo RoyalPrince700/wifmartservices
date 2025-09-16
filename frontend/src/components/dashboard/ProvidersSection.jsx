@@ -18,7 +18,7 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
         </div>
       ) : hiredProviders.length > 0 ? (
         <ul className="divide-y divide-gray-200">
-          {hiredProviders.map((provider) => {
+          {hiredProviders.map((provider, index) => {
             // Debug log to inspect verification fields
             console.log('👑 Provider Verified:', provider.name, {
               isVerifiedBadge: provider?.isVerifiedBadge,
@@ -34,7 +34,7 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
                 provider?.verification_status.toLowerCase() === 'approved');
 
             return (
-              <li key={provider.id} className="py-4 flex flex-col sm:flex-row sm:items-center">
+              <li key={`provider-${index}`} className="py-4 flex flex-col sm:flex-row sm:items-center">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="font-medium text-blue-800">
@@ -65,27 +65,14 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
                 <div className="ml-0 mt-2 sm:ml-3 sm:mt-0">
                   <p className="text-sm text-gray-500">{provider.service || 'No service'}</p>
                 </div>
-                <div className="ml-auto mt-2 sm:mt-0">
+                {/* Status and View Details on same line */}
+                <div className="ml-auto mt-2 sm:mt-0 flex items-center gap-3">
                   <StatusBadge status={provider.status || 'hired'} />
-                </div>
-                {/* View Details Button */}
-                <div className="ml-0 mt-3 sm:ml-4 sm:mt-0">
                   <button
-                    onClick={() => setSelectedProviderRequest({
-                      name: provider.name,
-                      profile_image: provider.profile_image,
-                      whatsapp: provider.whatsapp,
-                      requestDetails: {
-                        title: provider.title,
-                        budget: provider.budget,
-                        event_date: provider.event_date,
-                        location: provider.location,
-                        phone: provider.phone,
-                        email: provider.email,
-                        message: provider.message,
-                        attachment_url: provider.attachment_url,
-                      },
-                    })}
+                    onClick={() => {
+                      // Pass the full provider object so the modal can normalize fields reliably
+                      setSelectedProviderRequest(provider);
+                    }}
                     className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
                     View Details

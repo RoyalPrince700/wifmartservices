@@ -122,28 +122,6 @@ const ChatWindow = ({ otherUser, onClose }) => {
       setIsSending(true);
       const sentMsg = await sendMessage(otherUser._id, newMessage);
 
-      // Emit real-time message to other user
-      const socket = getSocket();
-      if (socket && socket.connected) {
-        const chatRoomId = getChatRoomId(currentUser._id, otherUser._id);
-        console.log('Sending message via socket:', {
-          chatId: chatRoomId,
-          message: sentMsg.message,
-          senderId: sentMsg.senderId._id || sentMsg.senderId,
-          receiverId: sentMsg.receiverId._id || sentMsg.receiverId,
-        });
-
-        socket.emit('send-message', {
-          chatId: chatRoomId,
-          message: sentMsg.message,
-          senderId: sentMsg.senderId._id || sentMsg.senderId,
-          receiverId: sentMsg.receiverId._id || sentMsg.receiverId,
-          timestamp: sentMsg.timestamp,
-        });
-      } else {
-        console.error('Socket not connected for sending message');
-      }
-
       setMessages((prev) => [...prev, sentMsg]);
       setNewMessage('');
     } catch (err) {
@@ -195,19 +173,19 @@ const ChatWindow = ({ otherUser, onClose }) => {
 
       {/* Message Input */}
       <form onSubmit={handleSend} className="p-4 border-t bg-white">
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
             disabled={isSending}
-            className={`flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isSending ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`flex-1 min-w-0 border border-gray-300 rounded-full px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isSending ? 'opacity-70 cursor-not-allowed' : ''}`}
           />
           <button
             type="submit"
             disabled={isSending || !newMessage.trim()}
-            className={`bg-blue-600 text-white rounded-full px-6 transition ${
+            className={`shrink-0 bg-blue-600 text-white rounded-full px-4 sm:px-5 md:px-6 transition ${
               isSending || !newMessage.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
             }`}
           >
