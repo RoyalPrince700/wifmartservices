@@ -153,7 +153,7 @@ const Navbar = () => {
                 <img
                   src={wifmartLogo}
                   alt="Wifmart"
-                  className="h-4 w-24 group-hover:scale-105 transition-all duration-300 transform"
+                  className="h-5 w-24 group-hover:scale-105 transition-all duration-300 transform"
                 />
               </Link>
             </div>
@@ -234,7 +234,7 @@ const Navbar = () => {
                   <input
                     type="text"
                     onFocus={handleMobileSearchFocus}
-                    className="block w-40 sm:w-48 pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="block w-40 sm:w-48 pl-10 pr-4 py-1 text-sm border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
                     placeholder="Search services..."
                     aria-label="Search for services"
                   />
@@ -254,7 +254,7 @@ const Navbar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 block pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium flex items-center transition-all duration-300 transform hover:translate-x-2"
+                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 flex items-center pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium transition-all duration-300 transform hover:translate-x-2"
                   onClick={() => setIsOpen(false)}
                 >
                   {React.createElement(item.icon, { className: "h-5 w-5 group-hover:scale-110 transition-transform duration-300" })}
@@ -264,7 +264,7 @@ const Navbar = () => {
               {token && (
                 <Link
                   to="/profile/edit"
-                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 block pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium flex items-center transition-all duration-300 transform hover:translate-x-2"
+                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 flex items-center pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium transition-all duration-300 transform hover:translate-x-2"
                   onClick={() => setIsOpen(false)}
                 >
                   <HiUser className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
@@ -275,7 +275,7 @@ const Navbar = () => {
               {!token && (
                 <Link
                   to="/signin"
-                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 block pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium flex items-center transition-all duration-300 transform hover:translate-x-2"
+                  className="group text-gray-600 hover:bg-blue-50/50 hover:text-blue-600 flex items-center pl-3 pr-4 py-3 border-l-4 border-transparent hover:border-blue-600 text-base font-medium transition-all duration-300 transform hover:translate-x-2"
                   onClick={() => setIsOpen(false)}
                 >
                   <HiArrowRight className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />

@@ -197,7 +197,7 @@ const emailTemplates = {
               <p><em>"${messagePreview}"</em></p>
             </div>
             <p>Click the button below to view the full message and reply:</p>
-            <a href="https://wifmart.com/messages" class="button">View Message</a>
+            <a href="https://wifmart.com/chat" class="button">View Message</a>
             <p><strong>Note:</strong> You'll only receive email notifications for the first message from each person to avoid spam. Subsequent messages from ${senderName} won't trigger email notifications.</p>
             <p>Best regards,<br>The Wifmart Team</p>
           </div>

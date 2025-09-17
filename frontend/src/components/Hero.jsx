@@ -181,7 +181,7 @@ const Hero = () => {
   const quickSearches = [
     { label: 'Graphics Designer', icon: HiDesktopComputer, color: 'text-blue-500', category: 'design' },
     { label: 'Vendors', icon: HiPencilAlt, color: 'text-blue-600', category: 'vendor' },
-    { label: 'Fashion Designer', icon: HiBriefcase, color: 'text-blue-700', category: 'vendor' },
+    { label: 'Fashion', icon: HiBriefcase, color: 'text-blue-700', category: 'vendor' },
   ];
 
   return (
