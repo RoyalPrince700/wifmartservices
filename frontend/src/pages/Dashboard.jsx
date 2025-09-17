@@ -269,7 +269,7 @@ const handleBuyBadge = async (plan) => {
         customizations: {
           title: 'Get Verified Badge',
           description: `Pay ₦${amount} to unlock full features`,
-          logo: 'https://wifmart.com/logo.png',
+          logo: 'https://wifmart.com/wifmart-icon.png',
         },
         callback: async (response) => {
   console.log("✅ Flutterwave callback:", response);
