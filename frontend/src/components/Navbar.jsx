@@ -153,7 +153,7 @@ const Navbar = () => {
                 <img
                   src={wifmartLogo}
                   alt="Wifmart"
-                  className="h-5 w-24 group-hover:scale-105 transition-all duration-300 transform"
+                  className="h-5 w-32 group-hover:scale-105 transition-all duration-300 transform"
                 />
               </Link>
             </div>
