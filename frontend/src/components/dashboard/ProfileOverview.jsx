@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-const ProfileOverview = ({ user, setActiveTab }) => {
+const ProfileOverview = ({ user }) => {
   const navigate = useNavigate();
 
   // Profile completion progress bar
@@ -21,9 +21,9 @@ const ProfileOverview = ({ user, setActiveTab }) => {
         {/* Get Verified Button - only show if not verified */}
         {!(user?.isVerifiedBadge === true ||
             user?.isVerified === true ||
-            user?.verification_status?.toLowerCase() === 'approved') && setActiveTab && (
+            user?.verification_status?.toLowerCase() === 'approved') && (
           <button
-            onClick={() => setActiveTab('verification')}
+            onClick={() => navigate('/verification')}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
             title="Get verified badge"
           >

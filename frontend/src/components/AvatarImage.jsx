@@ -14,43 +14,18 @@ const AvatarImage = ({ src, alt, name, size = "h-16 w-16", className = "", onCli
     setImageError(true);
   };
 
-  const getInitials = (name) => {
+  const getFirstLetter = (name) => {
     if (!name) return '?';
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-red-500',
-    'bg-yellow-500',
-    'bg-teal-500'
-  ];
-
-  const getColor = (name) => {
-    if (!name) return 'bg-gray-500';
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
+    return name.charAt(0).toUpperCase();
   };
 
   if (imageError || !src) {
     return (
       <div
-        className={`${size} rounded-full ${getColor(name)} flex items-center justify-center text-white font-semibold text-lg ${className} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+        className={`${size} rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg ${className} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
         onClick={onClick}
       >
-        {getInitials(name)}
+        {getFirstLetter(name)}
       </div>
     );
   }

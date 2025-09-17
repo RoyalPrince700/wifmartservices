@@ -24,30 +24,32 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
-              <h3 className="text-3xl font-extrabold mb-6 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:via-blue-600 group-hover:to-blue-700 transition-all duration-300 transform hover:scale-105">
-                Wifmart
-              </h3>
+              <img
+                src="/src/assets/wifmart-logo.png"
+                alt="Wifmart"
+                className="h-10 w-auto mb-6 group-hover:scale-105 transition-all duration-300 transform"
+              />
               <p className="text-gray-600 max-w-md">
                 Connecting skilled service providers with clients who need their expertise.
                 Find the perfect match for your projects or showcase your skills to potential clients.
               </p>
               <div className="flex mt-8 space-x-6">
-                <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
+                {/* <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
                   <span className="sr-only">Facebook</span>
                   <FaFacebook className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-                </a>
-                <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
+                </a> */}
+                <a href="https://www.instagram.com/wifmartofficial?igsh=MW01bTdidXd0Nm1jaA==" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
                   <span className="sr-only">Instagram</span>
                   <FaInstagram className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
                 </a>
-                <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
+                <a href="https://x.com/Wifmartofficial?t=kwz5_gi_t7ojDXJwllf4DA&s=09" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
                   <span className="sr-only">Twitter</span>
                   <FaTwitter className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
                 </a>
-                <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
+                {/* <a href="#" className="group text-gray-500 hover:text-blue-600 inline-flex items-center justify-center p-3 rounded-xl border border-gray-300/50 hover:border-blue-600/50 hover:bg-blue-600/10 text-sm font-medium transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-lg hover:shadow-xl hover:shadow-blue-600/25">
                   <span className="sr-only">LinkedIn</span>
                   <FaLinkedin className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-                </a>
+                </a> */}
               </div>
             </div>
 
@@ -133,9 +135,11 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto py-12 px-4 relative z-10">
           {/* Mobile Hero Section */}
           <div className="text-center mb-12">
-            <h3 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent animate-pulse">
-              Wifmart
-            </h3>
+            <img
+              src="/src/assets/wifmart-logo.png"
+              alt="Wifmart"
+              className="h-12 w-auto mb-4 mx-auto animate-pulse"
+            />
             <p className="text-gray-600 text-sm leading-relaxed px-2">
               Connecting skilled service providers with clients who need their expertise.
               Find the perfect match for your projects or showcase your skills to potential clients.
@@ -195,18 +199,18 @@ const Footer = () => {
                 Connect With Us
               </h3>
               <div className="flex justify-center space-x-4">
-                <a href="#" className="group bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-2xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
+                {/* <a href="#" className="group bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-2xl text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
                   <FaFacebook className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-                </a>
-                <a href="#" className="group bg-gradient-to-r from-pink-500 to-pink-600 p-4 rounded-2xl text-white hover:from-pink-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 hover:-rotate-6 shadow-lg hover:shadow-xl">
+                </a> */}
+                <a href="https://www.instagram.com/wifmartofficial?igsh=MW01bTdidXd0Nm1jaA==" className="group bg-gradient-to-r from-pink-500 to-pink-600 p-4 rounded-2xl text-white hover:from-pink-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 hover:-rotate-6 shadow-lg hover:shadow-xl">
                   <FaInstagram className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
                 </a>
-                <a href="#" className="group bg-gradient-to-r from-blue-400 to-blue-500 p-4 rounded-2xl text-white hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
+                <a href="https://x.com/Wifmartofficial?t=kwz5_gi_t7ojDXJwllf4DA&s=09" className="group bg-gradient-to-r from-blue-400 to-blue-500 p-4 rounded-2xl text-white hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-110 hover:rotate-6 shadow-lg hover:shadow-xl">
                   <FaTwitter className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
                 </a>
-                <a href="#" className="group bg-gradient-to-r from-blue-700 to-blue-800 p-4 rounded-2xl text-white hover:from-blue-800 hover:to-blue-900 transition-all duration-300 transform hover:scale-110 hover:-rotate-6 shadow-lg hover:shadow-xl">
+                {/* <a href="#" className="group bg-gradient-to-r from-blue-700 to-blue-800 p-4 rounded-2xl text-white hover:from-blue-800 hover:to-blue-900 transition-all duration-300 transform hover:scale-110 hover:-rotate-6 shadow-lg hover:shadow-xl">
                   <FaLinkedin className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>

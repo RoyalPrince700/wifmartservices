@@ -23,6 +23,7 @@ const ProfilePage = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedPortfolioImage, setSelectedPortfolioImage] = useState(null);
   const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState(null);
+  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
   const { user: currentUser } = useContext(AuthContext);
 
   useEffect(() => {
@@ -67,6 +68,18 @@ const ProfilePage = () => {
     : (provider?.skills ? String(provider.skills).split(',').map(s => s.trim()).filter(Boolean) : []);
 
   const profileUrl = `${window.location.origin}/profile/${id}`;
+
+  // Helper function to check if text should be truncated
+  const shouldTruncateText = (text, maxLength = 300) => {
+    return text && text.length > maxLength;
+  };
+
+  // Helper function to get truncated text
+  const getTruncatedText = (text, maxLength = 300) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
 
   const copyProfileLink = async () => {
     try {
@@ -254,7 +267,25 @@ const ProfilePage = () => {
             {provider.experience_pitch && (
               <section className="bg-white rounded-xl shadow-md p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">About & Experience</h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{provider.experience_pitch}</p>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {shouldTruncateText(provider.experience_pitch) ? (
+                    <>
+                      <div className={`overflow-hidden transition-all duration-300 ${!isAboutExpanded ? 'max-h-24' : 'max-h-none'}`}>
+                        <p>
+                          {isAboutExpanded ? provider.experience_pitch : getTruncatedText(provider.experience_pitch)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setIsAboutExpanded(!isAboutExpanded)}
+                        className="mt-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      >
+                        {isAboutExpanded ? 'View Less' : 'View More'}
+                      </button>
+                    </>
+                  ) : (
+                    <p>{provider.experience_pitch}</p>
+                  )}
+                </div>
               </section>
             )}
 

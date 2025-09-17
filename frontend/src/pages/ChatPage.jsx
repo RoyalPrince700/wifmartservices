@@ -6,6 +6,7 @@ import { getSocket } from '../services/socket';
 import { AuthContext } from '../contexts/AuthContext';
 import { HiCheckCircle } from 'react-icons/hi';
 import Loading from '../components/Loading';
+import AvatarImage from '../components/AvatarImage';
 
 const ChatPage = () => {
   const [conversations, setConversations] = useState([]);
@@ -280,10 +281,11 @@ const ChatPage = () => {
                     isActive ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'bg-white'
                   }`}
                 >
-                  <img
-                    src={conv.otherUser.profile_image || 'https://via.placeholder.com/40'}
+                  <AvatarImage
+                    src={conv.otherUser.profile_image}
                     alt={conv.otherUser.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    name={conv.otherUser.name}
+                    size="w-10 h-10"
                   />
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-gray-800 truncate flex items-center">
@@ -329,10 +331,11 @@ const ChatPage = () => {
               >
                 ←
               </button>
-              <img
-                src={selectedChat.profile_image || 'https://via.placeholder.com/40'}
+              <AvatarImage
+                src={selectedChat.profile_image}
                 alt={selectedChat.name}
-                className="w-10 h-10 rounded-full object-cover"
+                name={selectedChat.name}
+                size="w-10 h-10"
               />
               <div>
                 <h3 className="font-medium text-gray-800 text-sm sm:text-base flex items-center">

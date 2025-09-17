@@ -149,7 +149,7 @@ const Hero = () => {
         suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target) &&
         searchInputRef.current &&
-        !searchInputRef.current.contains(event.target)
+        !searchInputRef.current.contains(event.target)  
       ) {
         setShowSuggestions(false);
       }
@@ -166,10 +166,22 @@ const Hero = () => {
     }
   };
 
+  // Handle popular category click
+  const handleCategoryClick = (categoryItem) => {
+    const params = new URLSearchParams();
+    if (categoryItem.category) {
+      params.set('category', categoryItem.category);
+    }
+    if (categoryItem.label) {
+      params.set('q', categoryItem.label);
+    }
+    navigate(`/search?${params.toString()}`);
+  };
+
   const quickSearches = [
-    { label: 'Website Development', icon: HiDesktopComputer, color: 'text-blue-500' },
-    { label: 'Bag Vendors', icon: HiPencilAlt, color: 'text-blue-600' },
-    { label: 'Event Planners', icon: HiBriefcase, color: 'text-blue-700' },
+    { label: 'Graphics Designer', icon: HiDesktopComputer, color: 'text-blue-500', category: 'design' },
+    { label: 'Vendors', icon: HiPencilAlt, color: 'text-blue-600', category: 'vendor' },
+    { label: 'Fashion Designer', icon: HiBriefcase, color: 'text-blue-700', category: 'vendor' },
   ];
 
   return (
@@ -297,7 +309,7 @@ const Hero = () => {
                     <button
                       key={index}
                       type="button"
-                      onClick={() => setSearchQuery(item.label)}
+                      onClick={() => handleCategoryClick(item)}
                       className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-110 hover:-translate-y-1 animate-fade-in-stagger"
                       style={{ animationDelay: `${index * 200}ms` }}
                     >

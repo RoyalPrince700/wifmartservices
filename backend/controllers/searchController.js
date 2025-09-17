@@ -23,7 +23,7 @@ const categoryMappings = {
   design: ['graphic design', 'ui/ux design', 'web design', 'logo design', 'brand design', 'illustrator', 'photoshop', 'figma', 'adobe', 'creative design', 'ui design', 'ux design', 'user interface', 'user experience'],
   marketing: ['digital marketing', 'social media marketing', 'seo', 'content marketing', 'email marketing', 'marketing strategy', 'brand marketing', 'advertising', 'google ads', 'facebook ads', 'instagram marketing'],
   writing: ['content writing', 'copywriting', 'technical writing', 'blog writing', 'creative writing', 'ghostwriting', 'editing', 'proofreading', 'article writing', 'seo writing'],
-  vendor: ['vendor', 'supplier', 'retail', 'wholesale', 'fashion vendor', 'bag vendor', 'clothing vendor', 'product vendor', 'store', 'shop', 'market', 'sales', 'retailer', 'merchant'],
+  vendor: ['vendor', 'supplier', 'retail', 'wholesale', 'fashion vendor', 'bag vendor', 'clothing vendor', 'product vendor', 'store', 'shop', 'market', 'sales', 'retailer', 'merchant', 'bag maker', 'bag seller', 'fashion designer', 'tailor', 'shoe maker', 'jewelry maker', 'accessory designer', 'fashion stylist', 'bag', 'bags', 'handbag', 'handbags', 'purse', 'purses', 'leather goods', 'fashion accessories', 'clothing', 'apparel', 'fashion', 'style', 'designer', 'maker', 'seller', 'trader', 'dealer'],
   business: ['business consulting', 'business development', 'strategy consulting', 'management consulting', 'entrepreneurship', 'startup consulting', 'business planning', 'business advisor', 'business coach']
 };
 
@@ -55,10 +55,10 @@ export const searchProviders = async (req, res, next) => {
         ],
       };
 
-      // Combine with category query if both exist
+      // Combine with category query if both exist - use OR instead of AND for more flexible results
       if (Object.keys(query).length > 0) {
         query = {
-          $and: [query, searchQuery]
+          $or: [query, searchQuery]
         };
       } else {
         query = searchQuery;

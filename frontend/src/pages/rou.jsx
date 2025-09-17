@@ -6,6 +6,7 @@ import HireRequestModal from '../components/HireRequestModal';
 import { AuthContext } from '../../contexts/AuthContext';
 import ChatWindow from '../components/ChatWindow';
 import Loading from '../components/Loading';
+import AvatarImage from '../components/AvatarImage';
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -61,10 +62,12 @@ const ProfilePage = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center gap-6">
-        <img
-          src={provider.profile_image || 'https://via.placeholder.com/150'}
+        <AvatarImage
+          src={provider.profile_image}
           alt={provider.name}
-          className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+          name={provider.name}
+          size="w-32 h-32"
+          className="border-2 border-gray-200"
         />
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-800">{provider.name}</h1>

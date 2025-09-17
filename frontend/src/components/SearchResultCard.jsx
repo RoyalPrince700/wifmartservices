@@ -1,6 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { HiStar, HiLocationMarker, HiCurrencyDollar, HiCheckCircle } from 'react-icons/hi';
+import AvatarImage from './AvatarImage';
 
 const SearchResultCard = ({ provider }) => {
   const {
@@ -130,10 +131,12 @@ console.log("✅ Verified Check:", {
         {/* Header: Image & Name */}
         <div className="flex p-5 pb-4 gap-4">
           <div className="flex-shrink-0">
-            <img
+            <AvatarImage
               src={profileImageSrc}
               alt={name}
-              className="h-16 w-16 rounded-full object-cover ring-2 ring-gray-100"
+              name={name}
+              size="h-16 w-16"
+              className="ring-2 ring-gray-100"
             />
           </div>
           <div className="min-w-0 flex-1">

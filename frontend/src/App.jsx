@@ -15,6 +15,7 @@ import ProtectedLayout from './components/Auth/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import AdminDashboard from './pages/AdminDashboard';
 import BadgeVerificationPage from './pages/BadgeVerificationPage';
+import VerificationPage from './pages/VerificationPage';
 import ChatPage from './pages/ChatPage';
 import NotificationPage from './pages/NotificationPage';
 import TermsOfService from './pages/TermsOfService';
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="/profile/edit" element={<ProfileEdit />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/badge-verification" element={<BadgeVerificationPage />} />
+          <Route path="/verification" element={<VerificationPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/notifications" element={<NotificationPage />} />
         </Route>

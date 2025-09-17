@@ -1,14 +1,16 @@
-import { HiSearch, HiUserAdd, HiChat, HiCheckCircle, HiChevronLeft, HiChevronRight, HiArrowRight, HiSparkles } from 'react-icons/hi';
+import { HiSearch, HiUserAdd, HiChat, HiCheckCircle, HiChevronLeft, HiChevronRight, HiArrowRight, HiSparkles, HiUserGroup, HiBriefcase, HiCreditCard, HiStar } from 'react-icons/hi';
 import { useState, useRef, useEffect } from 'react';
 
 const HowItWorks = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [userType, setUserType] = useState('client'); // 'client' or 'provider'
   const carouselRef = useRef(null);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const steps = [
+  // Client steps (those who want to hire)
+  const clientSteps = [
     {
       id: 1,
       name: 'Search & Explore',
@@ -23,9 +25,9 @@ const HowItWorks = () => {
       name: 'Connect with Providers',
       description: 'View profiles, portfolios, and reviews to find the perfect match.',
       icon: <HiUserAdd className="h-10 w-10" />,
-      gradient: 'from-purple-500 to-pink-600',
-      bgGradient: 'from-purple-50 to-pink-100',
-      accentColor: 'text-purple-600',
+      gradient: 'from-blue-500 to-pink-600',
+      bgGradient: 'from-blue-50 to-pink-100',
+      accentColor: 'text-blue-600',
     },
     {
       id: 3,
@@ -46,6 +48,49 @@ const HowItWorks = () => {
       accentColor: 'text-orange-600',
     },
   ];
+
+  // Service provider steps
+  const providerSteps = [
+    {
+      id: 1,
+      name: 'Create Your Profile',
+      description: 'Set up your professional profile with skills, portfolio, and pricing.',
+      icon: <HiUserGroup className="h-10 w-10" />,
+      gradient: 'from-blue-500 to-indigo-600',
+      bgGradient: 'from-blue-50 to-indigo-100',
+      accentColor: 'text-blue-600',
+    },
+    {
+      id: 2,
+      name: 'Showcase Your Work',
+      description: 'Upload your portfolio and projects to attract potential clients.',
+      icon: <HiBriefcase className="h-10 w-10" />,
+      gradient: 'from-blue-500 to-pink-600',
+      bgGradient: 'from-blue-50 to-pink-100',
+      accentColor: 'text-blue-600',
+    },
+    {
+      id: 3,
+      name: 'Receive Inquiries',
+      description: 'Get direct messages from clients interested in your services.',
+      icon: <HiChat className="h-10 w-10" />,
+      gradient: 'from-green-500 to-emerald-600',
+      bgGradient: 'from-green-50 to-emerald-100',
+      accentColor: 'text-green-600',
+    },
+    {
+      id: 4,
+      name: 'Deliver & Earn',
+      description: 'Complete projects, get paid securely, and build your reputation.',
+      icon: <HiCreditCard className="h-10 w-10" />,
+      gradient: 'from-orange-500 to-red-600',
+      bgGradient: 'from-orange-50 to-red-100',
+      accentColor: 'text-orange-600',
+    },
+  ];
+
+  // Get current steps based on user type
+  const steps = userType === 'client' ? clientSteps : providerSteps;
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % steps.length);
@@ -110,8 +155,63 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900">How Wifmart Works</h2>
-          <p className="mt-4 text-lg text-gray-600">
-            Simple steps to find and hire the best service providers
+
+          {/* User Type Toggle */}
+          <div className="mt-6 flex justify-center">
+            <div className="relative bg-gray-100 rounded-2xl p-1 shadow-sm">
+              <div className="flex relative">
+                <button
+                  onClick={() => {
+                    setUserType('client');
+                    setCurrentSlide(0); // Reset to first slide when switching
+                  }}
+                  className={`relative px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                    userType === 'client'
+                      ? 'text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                    userType === 'client'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                      : 'bg-transparent'
+                  }`}></div>
+                  <span className="relative z-10 flex items-center">
+                    <HiSearch className="w-4 h-4 mr-2" />
+                    For Clients
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setUserType('provider');
+                    setCurrentSlide(0); // Reset to first slide when switching
+                  }}
+                  className={`relative px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                    userType === 'provider'
+                      ? 'text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                    userType === 'provider'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                      : 'bg-transparent'
+                  }`}></div>
+                  <span className="relative z-10 flex items-center">
+                    <HiBriefcase className="w-4 h-4 mr-2" />
+                    For Providers
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-lg text-gray-600">
+            {userType === 'client'
+              ? 'Simple steps to find and hire the best service providers'
+              : 'Simple steps to start providing services and grow your business'
+            }
           </p>
         </div>
 
@@ -186,19 +286,31 @@ const HowItWorks = () => {
               ))}
             </div>
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:scale-105 transition-all duration-200 z-10"
-            >
-              <HiChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-800 hover:scale-105 transition-all duration-200 z-10"
-            >
-              <HiChevronRight className="w-5 h-5" />
-            </button>
+            {/* Navigation Arrows - Below Content */}
+            <div className="flex justify-between items-center mt-6 px-4">
+              <button
+                onClick={prevSlide}
+                className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl text-gray-600 hover:text-blue-600 transition-all duration-300 transform hover:scale-110 border border-gray-200 hover:border-blue-300"
+              >
+                <HiChevronLeft className="w-6 h-6" />
+              </button>
+
+              <div className="flex-1 mx-4">
+                <div className="h-1 bg-gray-200 rounded-full">
+                  <div
+                    className="h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+                    style={{ width: `${((currentSlide + 1) / steps.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <button
+                onClick={nextSlide}
+                className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl text-gray-600 hover:text-blue-600 transition-all duration-300 transform hover:scale-110 border border-gray-200 hover:border-blue-300"
+              >
+                <HiChevronRight className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -272,46 +384,92 @@ const HowItWorks = () => {
 
             {/* Subtitle with better typography */}
             <p className="text-lg sm:text-xl text-white text-opacity-90 font-medium mb-2 leading-relaxed">
-              Join <span className="font-bold text-blue-200">10,000+</span> clients and service providers
+              {userType === 'client' ? (
+                <>Join <span className="font-bold text-blue-200">10,000+</span> clients and service providers</>
+              ) : (
+                <>Join <span className="font-bold text-blue-200">5,000+</span> service providers</>
+              )}
             </p>
             <p className="text-base text-white text-opacity-80 mb-8">
-              Start your journey with Wifmart today and unlock endless possibilities
+              {userType === 'client'
+                ? 'Start your journey with Wifmart today and unlock endless possibilities'
+                : 'Start providing services and grow your business with our platform'
+              }
             </p>
 
             {/* Creative buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-              {/* Primary button - Find Services */}
-              <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
-                {/* Button background animation */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute inset-0 bg-white opacity-100 group-hover:opacity-0 transition-opacity duration-300"></div>
+              {userType === 'client' ? (
+                <>
+                  {/* Primary button - Find Services */}
+                  <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                    {/* Button background animation */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-white opacity-100 group-hover:opacity-0 transition-opacity duration-300"></div>
 
-                {/* Button content */}
-                <span className="relative z-10 flex items-center">
-                  <HiSearch className="w-5 h-5 mr-3 text-blue-600 group-hover:text-white transition-colors duration-300" />
-                  <span className="text-blue-600 group-hover:text-white transition-colors duration-300">Find Services</span>
-                  <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300 text-blue-600 group-hover:text-white transition-colors duration-300" />
-                </span>
+                    {/* Button content */}
+                    <span className="relative z-10 flex items-center">
+                      <HiSearch className="w-5 h-5 mr-3 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                      <span className="text-blue-600 group-hover:text-white transition-colors duration-300">Find Services</span>
+                      <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    </span>
 
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[400%] transition-all duration-1000"></div>
-              </button>
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[400%] transition-all duration-1000"></div>
+                  </button>
 
-              {/* Secondary button - Become Provider */}
-              <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-2xl hover:bg-white hover:text-blue-600 transform hover:scale-105 transition-all duration-300 overflow-hidden">
-                {/* Button content */}
-                <span className="relative z-10 flex items-center">
-                  <HiSparkles className="w-5 h-5 mr-3" />
-                  Provide Services
-                  <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </span>
+                  {/* Secondary button - Become Provider */}
+                  <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-2xl hover:bg-white hover:text-blue-600 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                    {/* Button content */}
+                    <span className="relative z-10 flex items-center">
+                      <HiSparkles className="w-5 h-5 mr-3" />
+                      Provide Services
+                      <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
 
-                {/* Animated border effect */}
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-300 rounded-2xl transition-colors duration-300"></div>
+                    {/* Animated border effect */}
+                    <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-300 rounded-2xl transition-colors duration-300"></div>
 
-                {/* Background fill animation */}
-                <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-              </button>
+                    {/* Background fill animation */}
+                    <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Primary button - Start Providing */}
+                  <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                    {/* Button background animation */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-white opacity-100 group-hover:opacity-0 transition-opacity duration-300"></div>
+
+                    {/* Button content */}
+                    <span className="relative z-10 flex items-center">
+                      <HiBriefcase className="w-5 h-5 mr-3 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                      <span className="text-blue-600 group-hover:text-white transition-colors duration-300">Start Providing</span>
+                      <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    </span>
+
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[400%] transition-all duration-1000"></div>
+                  </button>
+
+                  {/* Secondary button - Find Clients */}
+                  <button className="group relative inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-2xl hover:bg-white hover:text-blue-600 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                    {/* Button content */}
+                    <span className="relative z-10 flex items-center">
+                      <HiUserAdd className="w-5 h-5 mr-3" />
+                      Find Clients
+                      <HiArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+
+                    {/* Animated border effect */}
+                    <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-300 rounded-2xl transition-colors duration-300"></div>
+
+                    {/* Background fill animation */}
+                    <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Trust indicators */}

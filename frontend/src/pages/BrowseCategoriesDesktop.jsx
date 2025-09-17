@@ -6,6 +6,7 @@ import {
   HiLocationMarker, HiStar, HiCheckCircle, HiChevronDown
 } from 'react-icons/hi';
 import { getAllProviders, getCategoryCounts, searchProviders } from '../services/api';
+import AvatarImage from '../components/AvatarImage';
 
 const BrowseCategoriesDesktop = () => {
   const navigate = useNavigate();
@@ -271,10 +272,11 @@ const BrowseCategoriesDesktop = () => {
                         <p className="text-sm font-medium text-gray-700">Top providers:</p>
                         {categoryProviders.slice(0, 2).map((provider) => (
                           <div key={provider._id} className="flex items-center space-x-2">
-                            <img
-                              src={provider.profile_image || 'https://via.placeholder.com/32x32?text=P'}
+                            <AvatarImage
+                              src={provider.profile_image}
                               alt={provider.name}
-                              className="w-6 h-6 rounded-full object-cover"
+                              name={provider.name}
+                              size="w-6 h-6"
                             />
                             <span className="text-sm text-gray-600 truncate">{provider.name}</span>
                             {provider.isVerifiedBadge && (
@@ -353,10 +355,12 @@ const BrowseCategoriesDesktop = () => {
                     className="block bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="flex items-center space-x-4 mb-4">
-                      <img
-                        src={profile_image || 'https://via.placeholder.com/48x48?text=P'}
+                      <AvatarImage
+                        src={profile_image}
                         alt={name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                        name={name}
+                        size="w-12 h-12"
+                        className="ring-2 ring-gray-100"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">

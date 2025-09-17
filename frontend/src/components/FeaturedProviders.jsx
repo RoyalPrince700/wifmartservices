@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { HiStar, HiLocationMarker, HiCheckCircle, HiArrowRight } from 'react-icons/hi';
 import { getFeaturedProviders } from '../services/api';
+import AvatarImage from './AvatarImage';
 
 const FeaturedProviders = () => {
   const [allProviders, setAllProviders] = useState([]);
@@ -192,7 +193,6 @@ const FeaturedProviders = () => {
             // Derive title from first skill or provide default
             const displayTitle = skills.length > 0 ? skills[0] : 'Service Provider';
             const displayLocation = formatLocation(provider);
-            const profileImageSrc = profile_image || 'https://via.placeholder.com/150?text=Profile';
             const verified = isVerified(provider);
 
             return (
@@ -206,10 +206,12 @@ const FeaturedProviders = () => {
                   {/* Header: Image & Name */}
                   <div className="flex p-5 pb-4 gap-4">
                     <div className="flex-shrink-0">
-                      <img
-                        src={profileImageSrc}
+                      <AvatarImage
+                        src={profile_image}
                         alt={name}
-                        className="h-16 w-16 rounded-full object-cover ring-2 ring-gray-100"
+                        name={name}
+                        size="h-16 w-16"
+                        className="ring-2 ring-gray-100"
                       />
                     </div>
                     <div className="min-w-0 flex-1">

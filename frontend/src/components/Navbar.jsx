@@ -149,9 +149,11 @@ const Navbar = () => {
 
               {/* Logo */}
               <Link to="/" className="flex-shrink-0 flex items-center group">
-                <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:via-blue-600 group-hover:to-blue-700 transition-all duration-300 transform group-hover:scale-105">
-                  Wifmart
-                </span>
+                <img
+                  src="/src/assets/wifmart-logo.png"
+                  alt="Wifmart"
+                  className="h-4 w-24 group-hover:scale-105 transition-all duration-300 transform"
+                />
               </Link>
             </div>
 
