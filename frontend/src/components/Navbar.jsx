@@ -211,7 +211,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile: Notification Bell or Search Input */}
+            {/* Mobile: Notification Bell or Search Icon */}
             <div className="md:hidden flex items-center">
               {token ? (
                 <Link
@@ -227,20 +227,13 @@ const Navbar = () => {
                   )}
                 </Link>
               ) : (
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <HiSearch className="h-5 w-5 text-gray-500 group-focus-within:text-blue-600 transition-colors duration-300" />
-                  </div>
-                  <input
-                    type="text"
-                    onFocus={handleMobileSearchFocus}
-                    className="block w-40 sm:w-48 pl-10 pr-4 py-1 text-sm border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
-                    placeholder="Search services..."
-                    aria-label="Search for services"
-                  />
-                  {/* Animated border effect */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-0 group-focus-within:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-                </div>
+                <Link
+                  to="/search-input"
+                  className="group p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg transition-all duration-300 transform hover:scale-110 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                  aria-label="Search for services"
+                >
+                  <HiSearch className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
+                </Link>
               )}
             </div>
           </div>
