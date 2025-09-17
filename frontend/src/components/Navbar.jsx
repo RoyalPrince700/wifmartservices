@@ -17,6 +17,7 @@ import Loading from './Loading';
 import { getUnreadCount } from '../services/api';
 import { getSocket } from '../services/socket';
 import NotificationDropdown from './NotificationDropdown';
+import wifmartLogo from '../assets/wifmart-logo.png';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -150,7 +151,7 @@ const Navbar = () => {
               {/* Logo */}
               <Link to="/" className="flex-shrink-0 flex items-center group">
                 <img
-                  src="/src/assets/wifmart-logo.png"
+                  src={wifmartLogo}
                   alt="Wifmart"
                   className="h-4 w-24 group-hover:scale-105 transition-all duration-300 transform"
                 />

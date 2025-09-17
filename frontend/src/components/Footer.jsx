@@ -10,6 +10,7 @@ import {
   FaInstagram, 
   FaLinkedin 
 } from 'react-icons/fa';
+import wifmartLogo from '../assets/wifmart-logo.png';
 
 const Footer = () => {
   return (
@@ -25,7 +26,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
               <img
-                src="/src/assets/wifmart-logo.png"
+                src={wifmartLogo}
                 alt="Wifmart"
                 className="h-10 w-auto mb-6 group-hover:scale-105 transition-all duration-300 transform"
               />
@@ -136,7 +137,7 @@ const Footer = () => {
           {/* Mobile Hero Section */}
           <div className="text-center mb-12">
             <img
-              src="/src/assets/wifmart-logo.png"
+              src={wifmartLogo}
               alt="Wifmart"
               className="h-12 w-auto mb-4 mx-auto animate-pulse"
             />
