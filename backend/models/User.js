@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
     enum: ['monthly', 'yearly', null],
     default: null, // 'monthly' or 'yearly'
   },
+  subscriptionTier: {
+    type: String,
+    enum: ['basic', 'premium', 'ultimate', null],
+    default: null, // 'basic', 'premium', 'ultimate'
+  },
   subscriptionStart: {
     type: Date,
     default: null,

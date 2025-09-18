@@ -137,7 +137,7 @@ const ProfileEdit = ({ setActiveTab }) => {
 
     if (name === 'portfolio_images') {
       const fileArray = Array.from(files);
-      const maxFiles = user?.verification_status === 'Approved' ? 10 : 3;
+      const maxFiles = user?.verification_status === 'Approved' ? 30 : 3;
       const totalExisting = formData.portfolio_image_urls.length;
       const totalCurrent = totalExisting + formData.portfolio_images.length;
 
@@ -147,8 +147,8 @@ const ProfileEdit = ({ setActiveTab }) => {
       }
 
       const validFiles = fileArray.filter(file => {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name} is too large (max 5MB)`);
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} is too large (max 10MB)`);
           return false;
         }
         return true;
@@ -229,7 +229,7 @@ const ProfileEdit = ({ setActiveTab }) => {
     return null;
   }
 
-  const maxPortfolio = user?.verification_status === 'Approved' ? 10 : 3;
+  const maxPortfolio = user?.verification_status === 'Approved' ? 30 : 3;
   const totalExisting = formData.portfolio_image_urls.length;
   const totalNew = formData.portfolio_images.length;
   const totalToDelete = formData.portfolio_images_to_delete.length;
@@ -302,10 +302,10 @@ const ProfileEdit = ({ setActiveTab }) => {
 
         {/* Portfolio Upload Grid */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Portfolio Images (max 5MB each)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-3">Portfolio Images (max 10MB each)</label>
           <p className="text-xs text-gray-500 mb-2">
             {user?.verification_status === 'Approved'
-              ? 'You can upload up to 10 images'
+              ? 'You can upload up to 30 images'
               : 'You can upload up to 3 images. Get verified to upload more.'}
           </p>
 
@@ -371,7 +371,7 @@ const ProfileEdit = ({ setActiveTab }) => {
             <div>
               <p className="font-medium">Want to upload more images?</p>
               <p className="text-sm text-gray-600 mt-1">
-                Get verified to upload up to 10 portfolio images and unlock premium features.
+                Get verified to upload up to 30 portfolio images and unlock premium features.
               </p>
               <button
                 onClick={(e) => {

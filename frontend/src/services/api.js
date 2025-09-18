@@ -343,9 +343,9 @@ export const updateHireRequest = async (serviceId, formData) => {
 /**
  * Initiate payment for verified badge
  */
-export const initiateBadgePayment = async (plan) => {
+export const initiateBadgePayment = async (plan, tier = 'basic') => {
   try {
-    const response = await api.post('/api/subscription/initiate', { plan });
+    const response = await api.post('/api/subscription/initiate', { plan, tier });
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || 'Failed to initiate payment';

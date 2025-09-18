@@ -219,7 +219,7 @@ export const setupProfile = async (req, res, next) => {
 export const getProfile = async (req, res, next) => {
   try {
    const user = await User.findById(req.user._id).select(
-  'name profile_image skills whatsapp phone instagram_handle cac_status verification_status isVerifiedBadge profile_completion'
+  'name profile_image skills whatsapp phone instagram_handle cac_status verification_status isVerifiedBadge subscriptionTier subscriptionType subscriptionStart subscriptionEnd profile_completion'
 );
 
     if (!user) {

@@ -70,7 +70,7 @@ PORTFOLIO: https://ibrahimphotography.com`
       title: 'Showcase Your Work with Portfolio Images',
       description: 'Upload high-quality portfolio images to visually demonstrate your skills and attract clients.',
       tips: [
-        'Upload up to 3 portfolio images (or 10 if verified)',
+        'Upload up to 3 portfolio images (or 30 if verified)',
         'Use JPEG, PNG, or WebP formats (max 5MB per image)',
         'Include before/after images when applicable',
         'Show diverse examples of your work quality',
@@ -320,7 +320,7 @@ Contact me today for a free consultation and quote!`
         'Complete identity verification to get verified badge',
         'Once verified, add your CAC Number (RC1234567 format)',
         'Upload your CAC Certificate (PDF or image)',
-        'Get access to upload up to 10 portfolio images',
+        'Get access to upload up to 30 portfolio images',
         'Display business registration details to clients',
         'Build credibility with official business documentation'
       ],
@@ -350,7 +350,7 @@ CAC CERTIFICATE:
         {
           title: 'Business Verification Benefits',
           content: `VERIFICATION UNLOCKS:
-✅ Upload up to 10 portfolio images (instead of 3)
+✅ Upload up to 30 portfolio images (instead of 3)
 ✅ Add CAC business registration details
 ✅ Display verified badge on your profile
 ✅ Higher visibility in search results

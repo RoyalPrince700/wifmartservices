@@ -82,27 +82,83 @@ const VerificationSection = ({
         ) : (
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              Pay to unlock:
+              Choose your verification tier:
             </p>
-            <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
-              <li>Upload CAC certificate</li>
-              <li>Add more portfolio images</li>
-              <li>Verified badge on your profile</li>
-              <li>Higher search ranking</li>
-            </ul>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => handleBuyBadge('monthly')}
-                className="flex-1 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center justify-center"
-              >
-                Pay ₦1,000/month
-              </button>
-              <button
-                onClick={() => handleBuyBadge('yearly')}
-                className="flex-1 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 flex items-center justify-center"
-              >
-                Pay ₦10,000/year 🎉 Save ₦2,000!
-              </button>
+            
+            <div className="space-y-3">
+              {/* Basic Tier */}
+              <div className="border border-gray-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-blue-600">Basic</h4>
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">5 Portfolio Images</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleBuyBadge('monthly', 'basic')}
+                    className="py-2 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 flex flex-col items-center justify-center"
+                  >
+                    <div className="font-semibold">₦1,000</div>
+                    <div>1 month</div>
+                  </button>
+                  <button
+                    onClick={() => handleBuyBadge('yearly', 'basic')}
+                    className="py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded hover:bg-blue-200 flex flex-col items-center justify-center border border-blue-200"
+                  >
+                    <div className="font-semibold">₦10,000</div>
+                    <div>1 year</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Premium Tier */}
+              <div className="border-2 border-purple-200 rounded-lg p-3 bg-purple-50">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-purple-600">Premium</h4>
+                  <span className="text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Most Popular</span>
+                </div>
+                <div className="text-xs text-purple-600 mb-2">15 Portfolio Images + Featured Listings</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleBuyBadge('monthly', 'premium')}
+                    className="py-2 bg-purple-600 text-white text-xs font-medium rounded hover:bg-purple-700 flex flex-col items-center justify-center"
+                  >
+                    <div className="font-semibold">₦2,000</div>
+                    <div>1 month</div>
+                  </button>
+                  <button
+                    onClick={() => handleBuyBadge('yearly', 'premium')}
+                    className="py-2 bg-purple-100 text-purple-700 text-xs font-medium rounded hover:bg-purple-200 flex flex-col items-center justify-center border border-purple-200"
+                  >
+                    <div className="font-semibold">₦20,000</div>
+                    <div>1 year</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Ultimate Tier */}
+              <div className="border border-emerald-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-emerald-600">Ultimate</h4>
+                  <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full">Unlimited</span>
+                </div>
+                <div className="text-xs text-emerald-600 mb-2">Unlimited Portfolio + Custom Branding</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleBuyBadge('monthly', 'ultimate')}
+                    className="py-2 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 flex flex-col items-center justify-center"
+                  >
+                    <div className="font-semibold">₦3,000</div>
+                    <div>1 month</div>
+                  </button>
+                  <button
+                    onClick={() => handleBuyBadge('yearly', 'ultimate')}
+                    className="py-2 bg-emerald-100 text-emerald-700 text-xs font-medium rounded hover:bg-emerald-200 flex flex-col items-center justify-center border border-emerald-200"
+                  >
+                    <div className="font-semibold">₦30,000</div>
+                    <div>1 year</div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -163,28 +219,25 @@ const VerificationSection = ({
                     </p>
                     <p className="mb-2">To upload your CAC documents, you need to:</p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
-                      <li>Purchase a Verified Badge (₦1,000/month or ₦10,000/year)</li>
+                      <li>Purchase a Verified Badge (Basic ₦1,000/month, Premium ₦2,000/month, Ultimate ₦3,000/month)</li>
                       <li>Complete your business verification</li>
-                      <li>Gain access to premium features</li>
+                      <li>Gain access to tier-specific premium features</li>
                     </ul>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="text-center">
               <button
-                onClick={() => handleBuyBadge('monthly')}
-                className="flex-1 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                onClick={() => navigate('/verification')}
+                className="w-full py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
               >
-                Get Verified Badge - ₦1,000/month
+                Choose Your Verification Tier
               </button>
-              <button
-                onClick={() => handleBuyBadge('yearly')}
-                className="flex-1 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 flex items-center justify-center"
-              >
-                Get Verified Badge - ₦10,000/year
-              </button>
+              <p className="text-xs text-gray-500 mt-2">
+                View all tiers and pricing options
+              </p>
             </div>
           </>
         )}

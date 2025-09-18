@@ -81,6 +81,33 @@ const ProfilePage = () => {
     return text.substring(0, maxLength).trim() + '...';
   };
 
+  // Helper function to shorten URLs for display
+  const shortenUrlForDisplay = (url, maxLength = 30) => {
+    if (!url) return '';
+    if (url.length <= maxLength) return url;
+
+    // For URLs, show domain + shortened path
+    try {
+      const urlObj = new URL(url);
+      const domain = urlObj.hostname;
+      const path = urlObj.pathname + urlObj.search + urlObj.hash;
+
+      if (domain.length + path.length <= maxLength) return url;
+
+      // Shorten path if too long
+      const availableLength = maxLength - domain.length - 3; // 3 for "..."
+      if (availableLength > 5) {
+        const shortenedPath = path.length > availableLength ? path.substring(0, availableLength) + '...' : path;
+        return `${domain}${shortenedPath}`;
+      } else {
+        return `${domain}...`;
+      }
+    } catch {
+      // If not a valid URL, just truncate normally
+      return url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
+    }
+  };
+
   const copyProfileLink = async () => {
     try {
       await navigator.clipboard.writeText(profileUrl);
@@ -236,25 +263,25 @@ const ProfilePage = () => {
                 {provider.portfolio_link && (
                   <a href={provider.portfolio_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700 hover:underline">
                     <span className="text-gray-500">🌐</span>
-                    Portfolio Website
+                    {shortenUrlForDisplay(provider.portfolio_link, 25)}
                   </a>
                 )}
                 {provider.instagram_handle && (
                   <a href={`https://instagram.com/${provider.instagram_handle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
                     <img src={instagramIcon} alt="Instagram" className="w-4 h-4" />
-                    Instagram @{provider.instagram_handle}
+                    Instagram @{shortenUrlForDisplay(provider.instagram_handle, 20)}
                   </a>
                 )}
                 {provider.x_handle && (
                   <a href={`https://x.com/${provider.x_handle.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
                     <img src={xIcon} alt="X" className="w-4 h-4" />
-                    X {provider.x_handle}
+                    X {shortenUrlForDisplay(provider.x_handle, 20)}
                   </a>
                 )}
                 {provider.linkedin_handle && (
                   <a href={provider.linkedin_handle} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
                     <img src={linkedinIcon} alt="LinkedIn" className="w-4 h-4" />
-                    LinkedIn
+                    {shortenUrlForDisplay(provider.linkedin_handle, 25)}
                   </a>
                 )}
               </div>
@@ -294,7 +321,7 @@ const ProfilePage = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Portfolio</h2>
                 {provider.portfolio_link && (
-                  <a href={provider.portfolio_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">Visit website</a>
+                  <a href={provider.portfolio_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">{shortenUrlForDisplay(provider.portfolio_link, 20)}</a>
                 )}
               </div>
               {provider.portfolio_images?.length > 0 ? (

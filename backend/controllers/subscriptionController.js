@@ -8,17 +8,87 @@ console.log("🔑 Backend Flutterwave Secret Key:", process.env.FLUTTERWAVE_SECR
 console.log("🔑 Backend JWT Secret:", process.env.JWT_SECRET ? "✅ Loaded" : "❌ Missing");
 console.log("🔑 Backend MongoDB URI:", process.env.MONGODB_URI ? "✅ Loaded" : "❌ Missing");
 
-// ✅ Add this missing function
+// Pricing configuration
+const PRICING_CONFIG = {
+  basic: {
+    monthly: { amount: 1000, currency: 'NGN' },
+    yearly: { amount: 10000, currency: 'NGN' }
+  },
+  premium: {
+    monthly: { amount: 2000, currency: 'NGN' },
+    yearly: { amount: 20000, currency: 'NGN' }
+  },
+  ultimate: {
+    monthly: { amount: 3000, currency: 'NGN' },
+    yearly: { amount: 30000, currency: 'NGN' }
+  }
+};
+
+// Legacy pricing for backward compatibility
+const LEGACY_PRICING = {
+  monthly: 1000,
+  '6months': 5000,
+  yearly: 10000
+};
+
+// ✅ Updated function to support tiers
 export const initiateBadgePayment = async (req, res) => {
-  const { plan } = req.body;
+  const { plan, tier } = req.body;
   const userId = req.user.id;
 
-  if (!['monthly', 'yearly'].includes(plan)) {
+  // Handle legacy requests (backward compatibility)
+  if (!tier && ['monthly', 'yearly', '6months'].includes(plan)) {
+    const amount = LEGACY_PRICING[plan];
+    const txRef = `badge_${Date.now()}_${userId}`;
+
+    try {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const subscription = new Subscription({
+        userId,
+        type: plan,
+        tier: 'basic', // Default to basic for legacy requests
+        amount,
+        txRef,
+        status: 'pending',
+      });
+
+      await subscription.save();
+
+      return res.json({
+        txRef,
+        amount,
+        currency: 'NGN',
+        customer: {
+          email: user.email,
+          phone: user.whatsapp || 'N/A',
+          name: user.name,
+        },
+        plan,
+        tier: 'basic',
+      });
+    } catch (error) {
+      console.error('Initiate Payment Error:', error);
+      return res.status(500).json({ error: 'Failed to initiate payment' });
+    }
+  }
+
+  // Handle new tier-based requests
+  if (!tier || !['basic', 'premium', 'ultimate'].includes(tier)) {
+    return res.status(400).json({ error: 'Invalid tier. Choose "basic", "premium", or "ultimate".' });
+  }
+
+  if (!plan || !['monthly', 'yearly'].includes(plan)) {
     return res.status(400).json({ error: 'Invalid plan. Choose "monthly" or "yearly".' });
   }
 
-  const amount = plan === 'monthly' ? 1000 : 10000;
-  const txRef = `badge_${Date.now()}_${userId}`;
+  const pricing = PRICING_CONFIG[tier][plan];
+  if (!pricing) {
+    return res.status(400).json({ error: 'Invalid pricing configuration' });
+  }
+
+  const txRef = `wifmart_${tier}_${plan}_${userId}_${Date.now()}`;
 
   try {
     const user = await User.findById(userId);
@@ -27,7 +97,8 @@ export const initiateBadgePayment = async (req, res) => {
     const subscription = new Subscription({
       userId,
       type: plan,
-      amount,
+      tier,
+      amount: pricing.amount,
       txRef,
       status: 'pending',
     });
@@ -36,14 +107,15 @@ export const initiateBadgePayment = async (req, res) => {
 
     res.json({
       txRef,
-      amount,
-      currency: 'NGN',
+      amount: pricing.amount,
+      currency: pricing.currency,
       customer: {
         email: user.email,
         phone: user.whatsapp || 'N/A',
         name: user.name,
       },
       plan,
+      tier,
     });
   } catch (error) {
     console.error('Initiate Payment Error:', error);
@@ -108,13 +180,13 @@ export const verifyBadgePayment = async (req, res) => {
 
     const startDate = new Date();
     const endDate = new Date();
-    endDate.setMonth(
-      endDate.getMonth() + (subscription.type === 'yearly' ? 12 : 1)
-    );
+    const monthsToAdd = subscription.type === 'yearly' ? 12 : subscription.type === '6months' ? 6 : 1;
+    endDate.setMonth(endDate.getMonth() + monthsToAdd);
 
     user.isVerifiedBadge = true;
     user.verification_status = 'Approved';
     user.subscriptionType = subscription.type;
+    user.subscriptionTier = subscription.tier || 'basic'; // Set tier, default to basic for legacy
     user.subscriptionStart = startDate;
     user.subscriptionEnd = endDate;
 
@@ -127,6 +199,8 @@ export const verifyBadgePayment = async (req, res) => {
         isVerifiedBadge: user.isVerifiedBadge,
         verification_status: user.verification_status,
         subscriptionType: user.subscriptionType,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionStart: user.subscriptionStart,
         subscriptionEnd: user.subscriptionEnd,
       },
     });

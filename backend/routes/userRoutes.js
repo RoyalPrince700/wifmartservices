@@ -27,7 +27,7 @@ router.post(
   upload.fields([
     { name: 'profile_image', maxCount: 1 },
     { name: 'cac_certificate', maxCount: 1 },
-    { name: 'portfolio_images', maxCount: 10 } // ✅ Updated to match frontend limit
+    { name: 'portfolio_images', maxCount: 30 } // ✅ Updated to match frontend limit
   ]),
   (req, res, next) => {
     // Handle portfolio_images_to_delete as a form field (not a file)

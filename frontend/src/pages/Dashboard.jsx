@@ -234,7 +234,7 @@ const handleLeaveReview = (serviceId) => {
 
 
 
-const handleBuyBadge = async (plan) => {
+const handleBuyBadge = async (plan, tier = 'basic') => {
   setPaymentLoading(true);
   try {
     // 🔍 Debug: Check environment variables
@@ -243,7 +243,7 @@ const handleBuyBadge = async (plan) => {
     console.log("  - Flutterwave Public Key:", import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ? "✅ Loaded" : "❌ Missing");
 
     // ✅ Step 1: Get real txRef from backend
-    const { txRef, amount, customer } = await initiateBadgePayment(plan);
+    const { txRef, amount, customer } = await initiateBadgePayment(plan, tier);
     console.log("🚀 Generated txRef:", txRef); // Should be "badge_..."
 
     // ✅ Step 2: Load Flutterwave
@@ -313,10 +313,11 @@ const handleBuyBadge = async (plan) => {
 
 // ✅ Handle renewing expired badge
 const handleRenewBadge = () => {
-  const plan = window.confirm('Renew yearly for ₦10,000? (Save ₦2,000)')
+  const currentTier = user?.subscriptionTier || 'basic';
+  const plan = window.confirm(`Renew yearly for ${currentTier} tier? (Save money with yearly billing)`)
     ? 'yearly'
     : 'monthly';
-  handleBuyBadge(plan);
+  handleBuyBadge(plan, currentTier);
 };
 
   // Show loading screen while initial data is loading

@@ -68,18 +68,27 @@ const BuyVerifiedBadge = () => {
         </ul>
       </p>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           onClick={() => handlePayment('monthly')}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white py-3 px-4 rounded hover:bg-blue-700 transition text-center"
         >
-          Pay ₦1,000/month
+          <div className="font-semibold">₦1,000</div>
+          <div className="text-sm">1 month</div>
+        </button>
+        <button
+          onClick={() => handlePayment('6months')}
+          className="bg-purple-600 text-white py-3 px-4 rounded hover:bg-purple-700 transition text-center"
+        >
+          <div className="font-semibold">₦5,000</div>
+          <div className="text-sm">6 months</div>
         </button>
         <button
           onClick={() => handlePayment('yearly')}
-          className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition"
+          className="bg-green-600 text-white py-3 px-4 rounded hover:bg-green-700 transition text-center"
         >
-          Pay ₦10,000/year 🎉 Save ₦2,000!
+          <div className="font-semibold">₦10,000</div>
+          <div className="text-sm">1 year 🎉 Best Value!</div>
         </button>
       </div>
     </div>

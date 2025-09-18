@@ -1,8 +1,20 @@
 // src/pages/AdminDashboard.jsx
 import React from 'react'; // ✅ Add this line
 import { useState, useEffect } from 'react';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+// Removed react-tabs for new sidebar layout
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Legend
+} from 'recharts';
 import { toast } from 'react-hot-toast';
 import Loading from '../components/Loading';
 
@@ -12,15 +24,7 @@ import {
   deleteAdminUser,
   getAdminServices,
   deleteAdminService,
-  getAdminPortfolios,
-  deleteAdminPortfolio,
   getVerifiedUsers,
-  getCACRequests,
-  approveCACVerification,
-  rejectCACVerification,
-  getBadgeRequests,
-  approveBadgeVerification,
-  rejectBadgeVerification,
   getAdminStats,
 } from '../services/api';
 
@@ -55,10 +59,8 @@ class ErrorBoundary extends React.Component {
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState([]);
-  const [portfolios, setPortfolios] = useState([]);
   const [verifiedUsers, setVerifiedUsers] = useState([]);
-  const [cacRequests, setCACRequests] = useState([]);
-  const [badgeRequests, setBadgeRequests] = useState([]);
+  const [selected, setSelected] = useState('overview');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalServices: 0,
@@ -69,19 +71,13 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [userPage, setUserPage] = useState(1);
   const [servicePage, setServicePage] = useState(1);
-  const [portfolioPage, setPortfolioPage] = useState(1);
   const [verifiedPage, setVerifiedPage] = useState(1);
-  const [cacPage, setCACPage] = useState(1);
-  const [badgePage, setBadgePage] = useState(1);
   const [userFilter, setUserFilter] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
   const limit = 10;
   const [userTotal, setUserTotal] = useState(0);
   const [serviceTotal, setServiceTotal] = useState(0);
-  const [portfolioTotal, setPortfolioTotal] = useState(0);
   const [verifiedTotal, setVerifiedTotal] = useState(0);
-  const [cacTotal, setCACTotal] = useState(0);
-  const [badgeTotal, setBadgeTotal] = useState(0);
 
   const fetchData = async (apiCall, setData, setTotal, page, filter = '') => {
     try {
@@ -99,10 +95,7 @@ const AdminDashboard = () => {
       await Promise.all([
         fetchData(getAdminUsers, setUsers, setUserTotal, userPage, userFilter),
         fetchData(getAdminServices, setServices, setServiceTotal, servicePage, serviceFilter),
-        fetchData(getAdminPortfolios, setPortfolios, setPortfolioTotal, portfolioPage),
         fetchData(getVerifiedUsers, setVerifiedUsers, setVerifiedTotal, verifiedPage),
-        fetchData(getCACRequests, setCACRequests, setCACTotal, cacPage),
-        fetchData(getBadgeRequests, setBadgeRequests, setBadgeTotal, badgePage),
         getAdminStats().then(setStats),
       ]);
     } catch (err) {
@@ -117,10 +110,7 @@ const AdminDashboard = () => {
   }, [
     userPage,
     servicePage,
-    portfolioPage,
     verifiedPage,
-    cacPage,
-    badgePage,
     userFilter,
     serviceFilter,
   ]);
@@ -150,65 +140,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeletePortfolio = async (id) => {
-    if (window.confirm('Delete this portfolio?')) {
-      try {
-        await deleteAdminPortfolio(id);
-        toast.success('Portfolio deleted');
-        fetchData(getAdminPortfolios, setPortfolios, setPortfolioTotal, portfolioPage);
-      } catch (err) {
-        toast.error('Delete failed');
-      }
-    }
-  };
-
-  // CAC Verification Actions
-  const handleApproveCAC = async (id) => {
-    if (window.confirm('Approve CAC verification?')) {
-      try {
-        await approveCACVerification(id);
-        toast.success('CAC verified');
-        fetchData(getCACRequests, setCACRequests, setCACTotal, cacPage);
-      } catch (err) {
-        toast.error('Approval failed');
-      }
-    }
-  };
-
-  const handleRejectCAC = async (id) => {
-    const reason = prompt('Enter rejection reason:') || 'Invalid documentation';
-    try {
-      await rejectCACVerification(id, reason);
-      toast.success('CAC application rejected');
-      fetchData(getCACRequests, setCACRequests, setCACTotal, cacPage);
-    } catch (err) {
-      toast.error('Rejection failed');
-    }
-  };
-
-  // Badge Verification Actions
-  const handleApproveBadge = async (id) => {
-    if (window.confirm('Grant verified badge?')) {
-      try {
-        await approveBadgeVerification(id);
-        toast.success('Badge approved');
-        fetchData(getBadgeRequests, setBadgeRequests, setBadgeTotal, badgePage);
-      } catch (err) {
-        toast.error('Approval failed');
-      }
-    }
-  };
-
-  const handleRejectBadge = async (id) => {
-    const reason = prompt('Enter rejection reason:') || 'Does not meet criteria';
-    try {
-      await rejectBadgeVerification(id, reason);
-      toast.success('Badge request rejected');
-      fetchData(getBadgeRequests, setBadgeRequests, setBadgeTotal, badgePage);
-    } catch (err) {
-      toast.error('Rejection failed');
-    }
-  };
+  // Removed portfolio and CAC/badge handlers in the new UI
 
   // Pagination Component
   const Pagination = ({ currentPage, total, setPage }) => {
@@ -244,322 +176,312 @@ const AdminDashboard = () => {
     );
   }
 
+  const navItems = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'users', label: 'Users' },
+    { id: 'services', label: 'Total Services' },
+    { id: 'verified', label: 'Verified Users' },
+    { id: 'conversations', label: 'Active Conversations' },
+  ];
+
+  const barData = [
+    { name: 'Users', value: stats.totalUsers || 0 },
+    { name: 'Services', value: stats.totalServices || 0 },
+    { name: 'Verified', value: stats.totalVerifiedUsers || 0 },
+    { name: 'Convos', value: stats.totalConversations || 0 },
+  ];
+
+  const pieData = [
+    { name: 'Verified', value: stats.totalVerifiedUsers || 0 },
+    { name: 'Unverified', value: Math.max((stats.totalUsers || 0) - (stats.totalVerifiedUsers || 0), 0) },
+  ];
+
+  const PIE_COLORS = ['#2563eb', '#93c5fd'];
+
   return (
     <ErrorBoundary>
-      <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
+          <div className="grid grid-cols-12 gap-6">
+            <aside className="col-span-12 md:col-span-4 lg:col-span-3 xl:col-span-2">
+              <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+                <div className="px-4 py-5 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+                  <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+                  <p className="text-xs opacity-90">Manage users, services and more</p>
+                </div>
+                <nav className="p-2">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelected(item.id)}
+                      className={`w-full text-left px-4 py-3 rounded-lg transition mb-1 ${
+                        selected === item.id
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </aside>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-          <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Total Users</h2>
-            <p className="text-3xl">{stats.totalUsers}</p>
-          </div>
-          <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Total Services</h2>
-            <p className="text-3xl">{stats.totalServices}</p>
-          </div>
-          <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Total Portfolios</h2>
-            <p className="text-3xl">{stats.totalPortfolios}</p>
-          </div>
-          <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Verified Users</h2>
-            <p className="text-3xl">{stats.totalVerifiedUsers}</p>
-          </div>
-          <div className="bg-white p-4 shadow-md rounded-md text-center">
-            <h2 className="text-xl font-semibold">Active Conversations</h2>
-            <p className="text-3xl">{stats.totalConversations}</p>
+            <main className="col-span-12 md:col-span-8 lg:col-span-9 xl:col-span-10">
+              {/* Overview header cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <p className="text-sm text-gray-500">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <p className="text-sm text-gray-500">Total Services</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalServices}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <p className="text-sm text-gray-500">Verified Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalVerifiedUsers}</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <p className="text-sm text-gray-500">Active Conversations</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalConversations}</p>
+                </div>
+              </div>
+
+              {/* Views */}
+              {selected === 'overview' && (
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 lg:col-span-2">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Platform Overview</h2>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis allowDecimals={false} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Verification Split</h2>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Tooltip />
+                          <Legend />
+                          <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                            {pieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {selected === 'users' && (
+                <section className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Manage Users</h2>
+                    <input
+                      type="text"
+                      placeholder="Filter by name or email"
+                      value={userFilter}
+                      onChange={(e) => setUserFilter(e.target.value)}
+                      className="px-3 py-2 border border-blue-200 rounded-md w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-md">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Name</th>
+                          <th className="px-4 py-2 text-left">Email</th>
+                          <th className="px-4 py-2 text-left">Skills</th>
+                          <th className="px-4 py-2 text-left">Admin</th>
+                          <th className="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.length > 0 ? (
+                          users.map((user) => (
+                            <tr key={user._id} className="border-t hover:bg-gray-50">
+                              <td className="px-4 py-2 font-medium">{user.name}</td>
+                              <td className="px-4 py-2">{user.email}</td>
+                              <td className="px-4 py-2">
+                                {Array.isArray(user.skills) ? user.skills.join(', ') : ''}
+                              </td>
+                              <td className="px-4 py-2">{user.isAdmin ? 'Yes' : 'No'}</td>
+                              <td className="px-4 py-2">
+                                <button
+                                  onClick={() => handleDeleteUser(user._id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="5" className="text-center py-6 text-gray-500">
+                              No users found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <Pagination currentPage={userPage} total={userTotal} setPage={setUserPage} />
+                </section>
+              )}
+
+              {selected === 'services' && (
+                <section className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Manage Services</h2>
+                    <input
+                      type="text"
+                      placeholder="Filter by title"
+                      value={serviceFilter}
+                      onChange={(e) => setServiceFilter(e.target.value)}
+                      className="px-3 py-2 border border-blue-200 rounded-md w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-md">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Client</th>
+                          <th className="px-4 py-2 text-left">Title</th>
+                          <th className="px-4 py-2 text-left">Budget</th>
+                          <th className="px-4 py-2 text-left">Status</th>
+                          <th className="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {services.length > 0 ? (
+                          services.map((service) => (
+                            <tr key={service._id} className="border-t hover:bg-gray-50">
+                              <td className="px-4 py-2">{service.client_id?.name || 'Unknown'}</td>
+                              <td className="px-4 py-2">{service.title}</td>
+                              <td className="px-4 py-2">{service.budget || 'N/A'}</td>
+                              <td className="px-4 py-2">
+                                <span
+                                  className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
+                                    ${service.status === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : service.status === 'accepted'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : service.status === 'hired'
+                                      ? 'bg-green-100 text-green-800'
+                                      : service.status === 'rejected'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                  {service.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2">
+                                <button
+                                  onClick={() => handleDeleteService(service._id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="5" className="text-center py-6 text-gray-500">
+                              No services found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <Pagination currentPage={servicePage} total={serviceTotal} setPage={setServicePage} />
+                </section>
+              )}
+
+              {selected === 'verified' && (
+                <section className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Verified Users</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white rounded-md">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left">User</th>
+                          <th className="px-4 py-2 text-left">Skills</th>
+                          <th className="px-4 py-2 text-left">Profile Completion</th>
+                          <th className="px-4 py-2 text-left">Verified Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {verifiedUsers.length > 0 ? (
+                          verifiedUsers.map((user) => (
+                            <tr key={user._id} className="border-t hover:bg-gray-50">
+                              <td className="px-4 py-2">
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-gray-500">{user.email}</p>
+                              </td>
+                              <td className="px-4 py-2">
+                                {Array.isArray(user.skills) ? user.skills.join(', ') : user.skills || 'N/A'}
+                              </td>
+                              <td className="px-4 py-2">{user.profile_completion}%</td>
+                              <td className="px-4 py-2">
+                                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="text-center py-6 text-gray-500">
+                              No verified users found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <Pagination currentPage={verifiedPage} total={verifiedTotal} setPage={setVerifiedPage} />
+                </section>
+              )}
+
+              {selected === 'conversations' && (
+                <section className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Active Conversations</h2>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Now</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats.totalConversations}</p>
+                    </div>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[{ name: 'Active', value: stats.totalConversations || 0 }] }>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Bar dataKey="value" fill="#60a5fa" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </section>
+              )}
+            </main>
           </div>
         </div>
-
-        {/* Tabs */}
-        <Tabs>
-          <TabList>
-            <Tab>Users</Tab>
-            <Tab>Services</Tab>
-            <Tab>Portfolios</Tab>
-            <Tab>CAC Verification</Tab>
-            <Tab>Verified Users</Tab>
-          </TabList>
-
-          {/* === USERS TAB === */}
-          <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
-            <input
-              type="text"
-              placeholder="Filter by name or email"
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-              className="mb-4 px-4 py-2 border border-gray-300 rounded-md w-full max-w-md"
-            />
-            <table className="min-w-full bg-white shadow-md rounded-md">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Skills</th>
-                  <th className="px-4 py-2 text-left">Admin</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length > 0 ? (
-                  users.map((user) => (
-                    <tr key={user._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2 font-medium">{user.name}</td>
-                      <td className="px-4 py-2">{user.email}</td>
-                      <td className="px-4 py-2">
-                        {Array.isArray(user.skills) ? user.skills.join(', ') : ''}
-                      </td>
-                      <td className="px-4 py-2">{user.isAdmin ? 'Yes' : 'No'}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center py-6 text-gray-500">
-                      No users found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Pagination currentPage={userPage} total={userTotal} setPage={setUserPage} />
-          </TabPanel>
-
-          {/* === SERVICES TAB === */}
-          <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">Manage Services</h2>
-            <input
-              type="text"
-              placeholder="Filter by title"
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="mb-4 px-4 py-2 border border-gray-300 rounded-md w-full max-w-md"
-            />
-            <table className="min-w-full bg-white shadow-md rounded-md">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">Client</th>
-                  <th className="px-4 py-2 text-left">Title</th>
-                  <th className="px-4 py-2 text-left">Budget</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.length > 0 ? (
-                  services.map((service) => (
-                    <tr key={service._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">{service.client_id?.name || 'Unknown'}</td>
-                      <td className="px-4 py-2">{service.title}</td>
-                      <td className="px-4 py-2">{service.budget || 'N/A'}</td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`inline-block px-2 py-1 text-xs font-semibold rounded-full
-                            ${service.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : service.status === 'accepted'
-                              ? 'bg-blue-100 text-blue-800'
-                              : service.status === 'hired'
-                              ? 'bg-green-100 text-green-800'
-                              : service.status === 'rejected'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-gray-100 text-gray-800'
-                            }`}
-                        >
-                          {service.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => handleDeleteService(service._id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center py-6 text-gray-500">
-                      No services found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Pagination currentPage={servicePage} total={serviceTotal} setPage={setServicePage} />
-          </TabPanel>
-
-          {/* === PORTFOLIOS TAB === */}
-          <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">Manage Portfolios</h2>
-            <table className="min-w-full bg-white shadow-md rounded-md">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">User</th>
-                  <th className="px-4 py-2 text-left">Image</th>
-                  <th className="px-4 py-2 text-left">Link</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {portfolios.length > 0 ? (
-                  portfolios.map((portfolio) => (
-                    <tr key={portfolio._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">{portfolio.user_id?.name || 'Unknown'}</td>
-                      <td className="px-4 py-2">
-                        <img
-                          src={portfolio.image_url}
-                          alt="Portfolio"
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        {portfolio.link ? (
-                          <a href={portfolio.link} target="_blank" rel="noopener noreferrer" className="text-blue-500">
-                            View
-                          </a>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => handleDeletePortfolio(portfolio._id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-6 text-gray-500">
-                      No portfolios found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Pagination currentPage={portfolioPage} total={portfolioTotal} setPage={setPortfolioPage} />
-          </TabPanel>
-
-          {/* === CAC VERIFICATION TAB === */}
-          <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">CAC Verification Requests</h2>
-            <table className="min-w-full bg-white shadow-md rounded-md">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">User</th>
-                  <th className="px-4 py-2 text-left">CAC Number</th>
-                  <th className="px-4 py-2 text-left">Certificate</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cacRequests.length > 0 ? (
-                  cacRequests.map((req) => (
-                    <tr key={req._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">
-                        <p className="font-medium">{req.name}</p>
-                        <p className="text-sm text-gray-500">{req.email}</p>
-                      </td>
-                      <td className="px-4 py-2 font-mono text-sm">{req.cac_number}</td>
-                      <td className="px-4 py-2">
-                        {req.cac_certificate ? (
-                          <a
-                            href={req.cac_certificate}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline"
-                          >
-                            View Certificate
-                          </a>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                      <td className="px-4 py-2 space-y-2">
-                        <button
-                          onClick={() => handleApproveCAC(req._id)}
-                          className="block w-full text-left text-green-500 hover:text-green-700"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleRejectCAC(req._id)}
-                          className="block w-full text-left text-red-500 hover:text-red-700"
-                        >
-                          Reject
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-6 text-gray-500">
-                      No pending CAC requests
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Pagination currentPage={cacPage} total={cacTotal} setPage={setCACPage} />
-          </TabPanel>
-
-          {/* === VERIFIED USERS TAB === */}
-          <TabPanel>
-            <h2 className="text-2xl font-bold mb-4">Verified Users with Badges</h2>
-            <table className="min-w-full bg-white shadow-md rounded-md">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">User</th>
-                  <th className="px-4 py-2 text-left">Skills</th>
-                  <th className="px-4 py-2 text-left">Profile Completion</th>
-                  <th className="px-4 py-2 text-left">Verified Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {verifiedUsers.length > 0 ? (
-                  verifiedUsers.map((user) => (
-                    <tr key={user._id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2">
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
-                      </td>
-                      <td className="px-4 py-2">
-                        {Array.isArray(user.skills) ? user.skills.join(', ') : user.skills || 'N/A'}
-                      </td>
-                      <td className="px-4 py-2">{user.profile_completion}%</td>
-                      <td className="px-4 py-2">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-6 text-gray-500">
-                      No verified users found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Pagination currentPage={verifiedPage} total={verifiedTotal} setPage={setVerifiedPage} />
-          </TabPanel>
-        </Tabs>
       </div>
     </ErrorBoundary>
   );
