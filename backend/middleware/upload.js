@@ -18,7 +18,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB (Ultimate tier limit)
   fileFilter: fileFilter,
 });
 
@@ -27,7 +27,7 @@ const upload = multer({
 export const profileUpload = upload.fields([
   { name: 'profile_image', maxCount: 1 },
   { name: 'cac_certificate', maxCount: 1 },
-  { name: 'portfolio_images', maxCount: 15 }
+  { name: 'portfolio_images', maxCount: 35 } // Ultimate tier limit
 ]);
 
 export default upload;

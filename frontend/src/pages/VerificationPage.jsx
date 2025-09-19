@@ -67,7 +67,7 @@ const VerificationPage = () => {
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "1.2x Search Ranking Boost", included: true },
         { icon: <HiEye className="w-5 h-5" />, text: "1.5x Profile Visibility", included: true },
         { icon: <HiDocumentText className="w-5 h-5" />, text: "CAC Upload Access", included: true },
-        { icon: <HiStar className="w-5 h-5" />, text: "Up to 5 Portfolio Images", included: true },
+        { icon: <HiStar className="w-5 h-5" />, text: "Up to 10 Portfolio Images", included: true },
         { icon: <HiCurrencyDollar className="w-5 h-5" />, text: "Basic Support", included: true },
         { icon: <HiStar className="w-5 h-5" />, text: "Priority Support", included: false },
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "Featured Listings", included: false }
@@ -84,7 +84,7 @@ const VerificationPage = () => {
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "1.5x Search Ranking Boost", included: true },
         { icon: <HiEye className="w-5 h-5" />, text: "2x Profile Visibility", included: true },
         { icon: <HiDocumentText className="w-5 h-5" />, text: "CAC Upload Access", included: true },
-        { icon: <HiStar className="w-5 h-5" />, text: "Up to 15 Portfolio Images", included: true },
+        { icon: <HiStar className="w-5 h-5" />, text: "Up to 20 Portfolio Images", included: true },
         { icon: <HiCurrencyDollar className="w-5 h-5" />, text: "Priority Support", included: true },
         { icon: <HiStar className="w-5 h-5" />, text: "Featured Listings", included: true },
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "Advanced Analytics", included: true }
@@ -101,7 +101,7 @@ const VerificationPage = () => {
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "2x Search Ranking Boost", included: true },
         { icon: <HiEye className="w-5 h-5" />, text: "3x Profile Visibility", included: true },
         { icon: <HiDocumentText className="w-5 h-5" />, text: "CAC Upload Access", included: true },
-        { icon: <HiStar className="w-5 h-5" />, text: "Unlimited Portfolio Images", included: true },
+        { icon: <HiStar className="w-5 h-5" />, text: "Up to 35 Portfolio Images", included: true },
         { icon: <HiCurrencyDollar className="w-5 h-5" />, text: "Priority Support", included: true },
         { icon: <HiStar className="w-5 h-5" />, text: "Featured Listings", included: true },
         { icon: <HiTrendingUp className="w-5 h-5" />, text: "Custom Branding", included: true }

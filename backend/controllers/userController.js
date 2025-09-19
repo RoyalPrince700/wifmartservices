@@ -5,6 +5,27 @@ import { uploadToCloudinary } from '../utils/cloudinaryUpload.js';
 import { calculateProfileCompletion } from '../utils/profileUtils.js';
 import cloudinary from '../config/cloudinary.js';
 
+// Helper function to get tier-based limits
+const getTierLimits = (user) => {
+  const tier = user?.subscriptionTier || 'basic';
+  const isActive = user?.isVerifiedBadge && user?.subscriptionEnd && new Date(user.subscriptionEnd) > new Date();
+
+  if (!isActive) {
+    return { maxImages: 3, maxFileSize: 5 * 1024 * 1024, maxSizeText: '5MB' };
+  }
+
+  switch (tier) {
+    case 'basic':
+      return { maxImages: 10, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+    case 'premium':
+      return { maxImages: 20, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+    case 'ultimate':
+      return { maxImages: 35, maxFileSize: 15 * 1024 * 1024, maxSizeText: '15MB' };
+    default:
+      return { maxImages: 10, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+  }
+};
+
 /**
  * Get user by ID (public)
  */
@@ -163,8 +184,32 @@ export const setupProfile = async (req, res, next) => {
         updateData.cac_status = 'Pending Verification';
       }
 
-      // 🖼️ Portfolio Images
+      // 🖼️ Portfolio Images - with tier validation
       if (req.files['portfolio_images']) {
+        // Get tier limits
+        const tierLimits = getTierLimits(req.user);
+
+        // Get current portfolio images count (after any deletions)
+        const currentPortfolioImages = updateData.portfolio_images || req.user.portfolio_images || [];
+        const newImagesCount = req.files['portfolio_images'].length;
+        const totalImages = currentPortfolioImages.length + newImagesCount;
+
+        // Check if user exceeds their tier limit
+        if (totalImages > tierLimits.maxImages) {
+          return res.status(400).json({
+            message: `You can only upload up to ${tierLimits.maxImages} portfolio images with your ${req.user.subscriptionTier || 'basic'} plan. You currently have ${currentPortfolioImages.length} images and are trying to upload ${newImagesCount} more.`
+          });
+        }
+
+        // Check file sizes
+        for (const file of req.files['portfolio_images']) {
+          if (file.size > tierLimits.maxFileSize) {
+            return res.status(400).json({
+              message: `File "${file.originalname}" exceeds the maximum size limit of ${tierLimits.maxSizeText} for your ${req.user.subscriptionTier || 'basic'} plan.`
+            });
+          }
+        }
+
         const uploadPromises = req.files['portfolio_images'].map(async (file) => {
           const result = await uploadToCloudinary(file, 'wifmart/portfolio');
           return {
@@ -173,9 +218,6 @@ export const setupProfile = async (req, res, next) => {
           };
         });
         const newImages = await Promise.all(uploadPromises);
-
-        // Get current portfolio images (after any deletions)
-        const currentPortfolioImages = updateData.portfolio_images || req.user.portfolio_images || [];
 
         updateData.portfolio_images = [
           ...currentPortfolioImages,  // Keep existing (after deletions)

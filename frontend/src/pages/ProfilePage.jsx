@@ -147,18 +147,25 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Blue banner */}
-      <div className="h-40 bg-gradient-to-r from-blue-700 to-blue-600 relative">
-        {/* Share button in top-right corner */}
-        <button
-          onClick={copyProfileLink}
-          className="absolute top-4 right-4 px-3 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-md"
-          title="Share Profile"
-        >
-          🔗 Share
-        </button>
+      <div className="bg-gradient-to-r from-blue-700 to-blue-600 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex justify-between items-center">
+            <div className="text-white">
+              <h1 className="text-2xl font-bold">Professional Profile</h1>
+              <p className="text-blue-100 mt-1">Discover skills and expertise</p>
+            </div>
+            <button
+              onClick={copyProfileLink}
+              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-md"
+              title="Share Profile"
+            >
+              🔗 Share
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 -mt-16 pb-24">
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Profile Card */}
           <aside className="lg:col-span-4">

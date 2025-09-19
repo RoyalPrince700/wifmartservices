@@ -42,11 +42,35 @@ const ProfileEdit = ({ setActiveTab }) => {
     portfolio_images_to_delete: [], // Track which existing images to delete
   });
 
+  const [currentPortfolioImage, setCurrentPortfolioImage] = useState(null); // Single image being uploaded
+  const [uploadingImage, setUploadingImage] = useState(false); // Upload status for current image
+
   const [newSkill, setNewSkill] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Helper function to get tier-based limits
+  const getTierLimits = () => {
+    const tier = user?.subscriptionTier || 'basic';
+    const isActive = user?.isVerifiedBadge && user?.subscriptionEnd && new Date(user.subscriptionEnd) > new Date();
+
+    if (!isActive) {
+      return { maxImages: 3, maxFileSize: 5 * 1024 * 1024, maxSizeText: '5MB' };
+    }
+
+    switch (tier) {
+      case 'basic':
+        return { maxImages: 10, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+      case 'premium':
+        return { maxImages: 20, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+      case 'ultimate':
+        return { maxImages: 35, maxFileSize: 15 * 1024 * 1024, maxSizeText: '15MB' };
+      default:
+        return { maxImages: 10, maxFileSize: 10 * 1024 * 1024, maxSizeText: '10MB' };
+    }
+  };
 
   // Function to capitalize first letter of each word
   const capitalizeWords = (str) => {
@@ -136,31 +160,68 @@ const ProfileEdit = ({ setActiveTab }) => {
     const { name, files } = e.target;
 
     if (name === 'portfolio_images') {
-      const fileArray = Array.from(files);
-      const maxFiles = user?.verification_status === 'Approved' ? 30 : 3;
+      const file = files[0];
+      if (!file) return;
+
+      const { maxImages: maxFiles, maxFileSize, maxSizeText } = getTierLimits();
       const totalExisting = formData.portfolio_image_urls.length;
       const totalCurrent = totalExisting + formData.portfolio_images.length;
 
-      if (fileArray.length > (maxFiles - totalCurrent)) {
+      if (totalCurrent >= maxFiles) {
         toast.error(`You can only upload up to ${maxFiles} images`);
         return;
       }
 
-      const validFiles = fileArray.filter(file => {
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error(`${file.name} is too large (max 10MB)`);
-          return false;
-        }
-        return true;
-      });
+      if (file.size > maxFileSize) {
+        toast.error(`${file.name} is too large (max ${maxSizeText})`);
+        return;
+      }
 
-      setFormData(prev => ({
-        ...prev,
-        portfolio_images: [...prev.portfolio_images, ...validFiles]
-      }));
+      setCurrentPortfolioImage(file);
+      // Clear the input so user can select the same file again if needed
+      e.target.value = '';
     } else {
       setFormData({ ...formData, [name]: files[0] });
     }
+  };
+
+  const savePortfolioImage = async () => {
+    if (!currentPortfolioImage) return;
+
+    setUploadingImage(true);
+    setError('');
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('portfolio_images', currentPortfolioImage);
+
+    try {
+      const result = await setupProfile(uploadFormData);
+      const { user: updatedUser } = result;
+
+      // Update the user context and form data
+      login(token, updatedUser);
+
+      // Add the new image URL to the portfolio_image_urls
+      setFormData(prev => ({
+        ...prev,
+        portfolio_image_urls: updatedUser.portfolio_images?.map(img => img.url) || []
+      }));
+
+      // Clear the current image
+      setCurrentPortfolioImage(null);
+
+      toast.success('Portfolio image uploaded successfully!');
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to upload image';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeCurrentPortfolioImage = () => {
+    setCurrentPortfolioImage(null);
   };
 
   const removePortfolioImage = (index) => {
@@ -229,7 +290,7 @@ const ProfileEdit = ({ setActiveTab }) => {
     return null;
   }
 
-  const maxPortfolio = user?.verification_status === 'Approved' ? 30 : 3;
+  const { maxImages: maxPortfolio } = getTierLimits();
   const totalExisting = formData.portfolio_image_urls.length;
   const totalNew = formData.portfolio_images.length;
   const totalToDelete = formData.portfolio_images_to_delete.length;
@@ -302,115 +363,178 @@ const ProfileEdit = ({ setActiveTab }) => {
 
         {/* Portfolio Upload Grid */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Portfolio Images (max 10MB each)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Portfolio Images (max {getTierLimits().maxSizeText} each)
+          </label>
           <p className="text-xs text-gray-500 mb-2">
-            {user?.verification_status === 'Approved'
-              ? 'You can upload up to 30 images'
-              : 'You can upload up to 3 images. Get verified to upload more.'}
+            {(() => {
+              const { maxImages } = getTierLimits();
+              const tier = user?.subscriptionTier || 'basic';
+              const isActive = user?.isVerifiedBadge && user?.subscriptionEnd && new Date(user.subscriptionEnd) > new Date();
+
+              if (!isActive) {
+                return 'You can upload up to 3 images. Get verified to upload more.';
+              }
+
+              return `You can upload up to ${maxImages} images with your ${tier.charAt(0).toUpperCase() + tier.slice(1)} plan.`;
+            })()}
           </p>
 
           <div className="grid grid-cols-4 gap-3">
-  {/* Show existing portfolio images */}
-  {formData.portfolio_image_urls.map((url, index) => (
-    <div key={`existing-${index}`} className="relative group">
-      <img
-        src={url}
-        alt={`Portfolio ${index}`}
-        className="w-full h-20 object-cover rounded border-2 border-blue-400"
-      />
-      <button
-        type="button"
-        onClick={() => removeExistingPortfolioImage(index)}
-        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-70"
-        title="Remove this image"
-      >
-        <span className="text-lg font-bold">✕</span>
-      </button>
-      <div className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded opacity-75">
-        Saved
-      </div>
-    </div>
-  ))}
+            {/* Show existing portfolio images */}
+            {formData.portfolio_image_urls.map((url, index) => (
+              <div key={`existing-${index}`} className="relative group">
+                <img
+                  src={url}
+                  alt={`Portfolio ${index}`}
+                  className="w-full h-20 object-cover rounded border-2 border-blue-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExistingPortfolioImage(index)}
+                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-70"
+                  title="Remove this image"
+                >
+                  <span className="text-lg font-bold">✕</span>
+                </button>
+                <div className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded opacity-75">
+                  Saved
+                </div>
+              </div>
+            ))}
 
-  {/* Show newly selected images to upload */}
-  {formData.portfolio_images.map((file, index) => (
-    <div key={`new-${index}`} className="relative group">
-      <img
-        src={URL.createObjectURL(file)}
-        alt={`New ${index}`}
-        className="w-full h-20 object-cover rounded border-2 border-green-400"
-      />
-      <button
-        type="button"
-        onClick={() => removePortfolioImage(index)}
-        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        ✕
-      </button>
-    </div>
-  ))}
+            {/* Show current image being uploaded */}
+            {currentPortfolioImage && (
+              <div className="relative group border-2 border-orange-400 rounded">
+                <img
+                  src={URL.createObjectURL(currentPortfolioImage)}
+                  alt="Current upload"
+                  className="w-full h-20 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={removeCurrentPortfolioImage}
+                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={uploadingImage}
+                >
+                  ✕
+                </button>
+                <div className="absolute bottom-1 left-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded opacity-75">
+                  Ready to Save
+                </div>
+              </div>
+            )}
 
-  {/* Show upload slots for remaining capacity */}
-  {Array.from({ length: maxPortfolio - totalUploaded }).map((_, index) => (
-    <div
-      key={`upload-slot-${index}`}
-      className="flex items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
-      onClick={() => document.getElementById('portfolio-upload').click()}
-    >
-      <FaImage className="text-gray-400" size={24} />
-    </div>
-  ))}
-
-  {/* 4th Box: Verification Prompt (Only after 3 images, if not verified) */}
-  {user?.verification_status !== 'Approved' &&
-    totalUploaded >= 3 && (
-      <div
-        className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded bg-gray-50 cursor-pointer hover:bg-gray-100 group"
-        onClick={() => {
-          toast(
-            <div>
-              <p className="font-medium">Want to upload more images?</p>
-              <p className="text-sm text-gray-600 mt-1">
-                Get verified to upload up to 30 portfolio images and unlock premium features.
-              </p>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toast.dismiss();
-                  setActiveTab('verification');
-                  navigate('/dashboard');
-                }}
-                className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+            {/* Show upload slots for remaining capacity */}
+            {Array.from({ length: maxPortfolio - totalUploaded - (currentPortfolioImage ? 1 : 0) }).map((_, index) => (
+              <div
+                key={`upload-slot-${index}`}
+                className="flex items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded bg-white hover:bg-gray-50 cursor-pointer"
+                onClick={() => document.getElementById('portfolio-upload').click()}
               >
-                Go to Verification
-              </button>
-            </div>,
-            {
-              duration: 10000,
-              position: 'top-center',
-            }
-          );
-        }}
-      >
-        <BiLockAlt className="text-gray-400 group-hover:text-blue-500 transition" size={24} />
-        <span className="text-xs text-gray-500 mt-1">Get Verified</span>
-      </div>
-    )}
-</div>
+                <FaImage className="text-gray-400" size={24} />
+              </div>
+            ))}
 
-{/* Hidden file input */}
-<input
-  id="portfolio-upload"
-  type="file"
-  accept="image/jpeg,image/png,image/webp"
-  multiple
-  name="portfolio_images"
-  onChange={handleFileChange}
-  className="hidden"
-/>
+            {/* 4th Box: Upgrade Prompt (Only after reaching current tier limit) */}
+            {(() => {
+              const { maxImages } = getTierLimits();
+              const isActive = user?.isVerifiedBadge && user?.subscriptionEnd && new Date(user.subscriptionEnd) > new Date();
+              return !isActive && totalUploaded >= 3;
+            })() && (
+                <div
+                  className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded bg-gray-50 cursor-pointer hover:bg-gray-100 group"
+                  onClick={() => {
+                    toast(
+                      <div>
+                        <p className="font-medium">Want to upload more images?</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Get verified to upload up to 30 portfolio images and unlock premium features.
+                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.dismiss();
+                            setActiveTab('verification');
+                            navigate('/dashboard');
+                          }}
+                          className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                        >
+                          Go to Verification
+                        </button>
+                      </div>,
+                      {
+                        duration: 10000,
+                        position: 'top-center',
+                      }
+                    );
+                  }}
+                >
+                  <BiLockAlt className="text-gray-400 group-hover:text-blue-500 transition" size={24} />
+                  <span className="text-xs text-gray-500 mt-1">Get Verified</span>
+                </div>
+              )}
+          </div>
+
+          {/* Hidden file input */}
+          <input
+            id="portfolio-upload"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            name="portfolio_images"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {/* Save Image Button */}
+          {currentPortfolioImage && (
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={savePortfolioImage}
+                disabled={uploadingImage}
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 ${
+                  uploadingImage
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {uploadingImage ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <FaPlus size={12} />
+                    Save Image
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           <p className="text-xs text-gray-500 mt-2">
-            {totalUploaded}/{maxPortfolio} images
+            {totalUploaded + (currentPortfolioImage ? 1 : 0)}/{maxPortfolio} images
           </p>
         </div>
 
