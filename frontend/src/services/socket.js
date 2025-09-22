@@ -6,7 +6,6 @@ let socket;
 export const initSocket = (token) => {
   if (!socket) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-    console.log('🔌 Initializing socket connection to:', apiUrl);
 
     socket = io(apiUrl, {
       auth: { token },
@@ -17,25 +16,25 @@ export const initSocket = (token) => {
       reconnectionDelay: 1000,
     });
 
-    // Add connection event listeners for debugging
+    // Add connection event listeners
     socket.on('connect', () => {
-      console.log('🟢 Socket connected successfully:', socket.id);
+      // Socket connected
     });
 
     socket.on('connect_error', (error) => {
-      console.error('🔴 Socket connection error:', error);
+      // Connection error
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('🔌 Socket disconnected:', reason);
+      // Socket disconnected
     });
 
     socket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
+      // Socket reconnected
     });
 
     socket.on('reconnect_error', (error) => {
-      console.error('❌ Socket reconnection failed:', error);
+      // Reconnection failed
     });
   }
   return socket;
@@ -43,7 +42,6 @@ export const initSocket = (token) => {
 
 export const getSocket = () => {
   if (!socket) {
-    console.warn('Socket not initialized yet');
     return null;
   }
   return socket;

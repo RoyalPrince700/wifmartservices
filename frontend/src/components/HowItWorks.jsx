@@ -316,15 +316,15 @@ const HowItWorks = () => {
 
         {/* Desktop Grid */}
         <div className="hidden sm:block mt-16">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
             {steps.map((step, index) => (
-              <div key={step.id} className="relative group">
+              <div key={step.id} className="relative group h-full">
                 {index < steps.length - 1 && (
                   <div className="hidden absolute inset-0 lg:flex items-center justify-center">
                     <div className="h-0.5 w-full bg-gradient-to-r from-gray-200 to-gray-300"></div>
                   </div>
                 )}
-                <div className="relative flex flex-col items-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="relative h-full flex flex-col items-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                   {/* Step Number */}
                   <div className={`flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${step.gradient} text-white font-bold text-2xl shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     {step.id}
@@ -344,7 +344,7 @@ const HowItWorks = () => {
                   </p>
 
                   {/* Hover Effect */}
-                  <div className={`mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${step.accentColor} font-semibold`}>
+                  <div className={`mt-auto pt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${step.accentColor} font-semibold`}>
                     Learn More →
                   </div>
                 </div>

@@ -29,20 +29,33 @@ const categoryMappings = {
 
 export const searchProviders = async (req, res, next) => {
   try {
-    console.log('Search query received:', req.query); // Debug log
-    const { q, category } = req.query;
+    console.log('Search query received:', req.query);
+    const { q, category, city, state, location_state, verified, minRating, minProfile } = req.query;
 
-    let query = {};
+    let match = {};
 
-    // Handle category filtering
+    // Category filtering
     if (category && categoryMappings[category]) {
       const categorySkills = categoryMappings[category];
-      query.skills = {
-        $in: categorySkills.map(skill => new RegExp(skill, 'i'))
-      };
+      match.skills = { $in: categorySkills.map((skill) => new RegExp(skill, 'i')) };
     }
 
-    // Handle search query
+    // Location filters (exact or case-insensitive matches)
+    const locationConditions = [];
+    if (city && city.trim()) {
+      locationConditions.push({ city: new RegExp(`^${city.trim()}$`, 'i') });
+    }
+    if (state && state.trim()) {
+      locationConditions.push({ state: new RegExp(`^${state.trim()}$`, 'i') });
+    }
+    if (location_state && location_state.trim()) {
+      locationConditions.push({ location_state: new RegExp(`^${location_state.trim()}$`, 'i') });
+    }
+    if (locationConditions.length > 0) {
+      match = Object.keys(match).length > 0 ? { $and: [match, { $or: locationConditions }] } : { $or: locationConditions };
+    }
+
+    // Free-text search across relevant fields
     if (q && q.trim()) {
       const searchRegex = new RegExp(q.trim(), 'i');
       const searchQuery = {
@@ -51,30 +64,67 @@ export const searchProviders = async (req, res, next) => {
           { name: searchRegex },
           { location_state: searchRegex },
           { city: searchRegex },
-          { state: searchRegex }
+          { state: searchRegex },
         ],
       };
 
-      // Combine with category query if both exist - use OR instead of AND for more flexible results
-      if (Object.keys(query).length > 0) {
-        query = {
-          $or: [query, searchQuery]
-        };
+      if (Object.keys(match).length > 0) {
+        match = { $and: [match, searchQuery] };
       } else {
-        query = searchQuery;
+        match = searchQuery;
       }
     }
 
-    console.log('Final MongoDB query:', JSON.stringify(query, null, 2)); // Debug log
+    console.log('Final MongoDB match:', JSON.stringify(match, null, 2));
 
-    const providers = await User.find(query).select(
-      'name profile_image skills location_state isVerifiedBadge verification_status experience_pitch bio hourlyRate rating city state'
-    );
+    // Use aggregation so we can compute a verified score and sort properly
+    const providers = await User.aggregate([
+      { $match: match },
+      {
+        $addFields: {
+          verifiedScore: {
+            $cond: [
+              { $or: [ { $eq: ['$isVerifiedBadge', true] }, { $eq: ['$verification_status', 'Approved'] } ] },
+              1,
+              0,
+            ],
+          },
+          safeProfileCompletion: { $ifNull: ['$profile_completion', 0] },
+          safeRating: { $ifNull: ['$rating', 0] },
+          safeTotalReviews: { $ifNull: ['$totalReviews', 0] },
+        },
+      },
+      // Apply numeric filters if provided
+      ...(minRating ? [{ $match: { rating: { $gte: Number(minRating) } } }] : []),
+      ...(minProfile ? [{ $match: { $expr: { $gte: ['$safeProfileCompletion', Number(minProfile)] } } }] : []),
+      ...(verified === 'true' ? [{ $match: { $or: [ { isVerifiedBadge: true }, { verification_status: 'Approved' } ] } }] : []),
+      {
+        $project: {
+          name: 1,
+          profile_image: 1,
+          skills: 1,
+          location_state: 1,
+          isVerifiedBadge: 1,
+          verification_status: 1,
+          experience_pitch: 1,
+          bio: 1,
+          hourlyRate: 1,
+          rating: 1,
+          totalReviews: 1,
+          city: 1,
+          state: 1,
+          profile_completion: '$safeProfileCompletion',
+          verifiedScore: 1,
+        },
+      },
+      // Sort: verified first, then by profile completeness, then rating and reviews
+      { $sort: { verifiedScore: -1, profile_completion: -1, rating: -1, totalReviews: -1, _id: 1 } },
+    ]);
 
-    console.log('Found providers:', providers.length); // Debug log
+    console.log('Found providers:', providers.length);
     res.json(providers);
   } catch (error) {
-    console.error('Search error:', error); // Debug log
+    console.error('Search error:', error);
     next(error);
   }
 };

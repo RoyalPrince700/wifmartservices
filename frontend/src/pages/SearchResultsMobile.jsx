@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { HiSearch, HiArrowRight, HiSparkles, HiExclamation, HiRefresh, HiX, HiFilter, HiChevronDown } from 'react-icons/hi';
+import { HiSearch, HiArrowRight, HiSparkles, HiExclamation, HiRefresh, HiX, HiFilter, HiChevronDown, HiUserGroup } from 'react-icons/hi';
 import debounce from "lodash/debounce";
 import SearchResultCard from '../../src/components/SearchResultCard';
 import { searchProviders } from '../../src/services/api';
@@ -18,6 +18,12 @@ const SearchResultsMobile = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [cameFromSearch, setCameFromSearch] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  // Filters
+  const [filterCity, setFilterCity] = useState(searchParams.get('city') || '');
+  const [filterState, setFilterState] = useState(searchParams.get('state') || '');
+  const [filterVerified, setFilterVerified] = useState(searchParams.get('verified') === 'true');
+  const [filterMinRating, setFilterMinRating] = useState(searchParams.get('minRating') || '');
+  const [filterMinProfile, setFilterMinProfile] = useState(searchParams.get('minProfile') || '');
 
   // Category name mapping
   const categoryNames = {
@@ -53,8 +59,8 @@ const SearchResultsMobile = () => {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (query, categoryParam) => {
-      if (!query.trim() && !categoryParam) {
+    debounce(async (query, categoryParam, filters) => {
+      if (!query.trim() && !categoryParam && !filtersHasValue(filters)) {
         setProviders([]);
         setLoading(false);
         return;
@@ -62,7 +68,7 @@ const SearchResultsMobile = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await searchProviders(query, categoryParam);
+        const response = await searchProviders(query, categoryParam, filters);
         setProviders(response);
         setLoading(false);
       } catch (err) {
@@ -74,19 +80,34 @@ const SearchResultsMobile = () => {
     []
   );
 
+  const filtersHasValue = (f) => {
+    return !!(f.city || f.state || typeof f.verified !== 'undefined' && f.verified !== null && f.verified !== '' || f.minRating || f.minProfile);
+  };
+
   // Update state when URL params change
   useEffect(() => {
     const query = searchParams.get('q') || '';
     const cat = searchParams.get('category') || '';
+    setFilterCity(searchParams.get('city') || '');
+    setFilterState(searchParams.get('state') || '');
+    setFilterVerified(searchParams.get('verified') === 'true');
+    setFilterMinRating(searchParams.get('minRating') || '');
+    setFilterMinProfile(searchParams.get('minProfile') || '');
     setSearchQuery(query);
     setCategory(cat);
   }, [searchParams]);
 
   // Fetch providers when search query or category changes
   useEffect(() => {
-    debouncedSearch(searchQuery, category);
+    debouncedSearch(searchQuery, category, {
+      city: filterCity,
+      state: filterState,
+      verified: filterVerified,
+      minRating: filterMinRating,
+      minProfile: filterMinProfile,
+    });
     return () => debouncedSearch.cancel();
-  }, [searchQuery, category, debouncedSearch]);
+  }, [searchQuery, category, filterCity, filterState, filterVerified, filterMinRating, filterMinProfile, debouncedSearch]);
 
   // Handle search form submission
   const handleSearch = (e) => {
@@ -98,6 +119,23 @@ const SearchResultsMobile = () => {
     if (category) {
       params.category = category;
     }
+    if (filterCity) params.city = filterCity.trim();
+    if (filterState) params.state = filterState.trim();
+    if (filterVerified) params.verified = 'true'; else if (searchParams.get('verified')) params.verified = '';
+    if (filterMinRating) params.minRating = filterMinRating;
+    if (filterMinProfile) params.minProfile = filterMinProfile;
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setFilterCity('');
+    setFilterState('');
+    setFilterVerified(false);
+    setFilterMinRating('');
+    setFilterMinProfile('');
+    const params = {};
+    if (searchQuery.trim()) params.q = searchQuery.trim();
+    if (category) params.category = category;
     setSearchParams(params);
   };
 
@@ -119,12 +157,23 @@ const SearchResultsMobile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header */}
-      <div className="sticky top-0 bg-white shadow-sm border-b z-10">
+      <div className="sticky top-0 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-sm border-b z-10">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-semibold text-gray-900">
-              {category ? getCategoryDisplayName(category) : 'Search Results'}
-            </h1>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">
+                {category ? getCategoryDisplayName(category) : 'Search Results'}
+              </h1>
+              <div className="mt-1 flex items-center gap-2 text-xs text-gray-600">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200">
+                  <HiUserGroup className="w-3.5 h-3.5 text-blue-600" />
+                  {loading ? 'Searching…' : `${providers.length} found`}
+                </span>
+                {searchQuery && (
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">"{searchQuery}"</span>
+                )}
+              </div>
+            </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
@@ -156,30 +205,63 @@ const SearchResultsMobile = () => {
             </div>
           </form>
 
-          {/* Category Filter Toggle */}
+          {/* Filters Panel */}
           {showFilters && (
             <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(categoryNames).map(([id, name]) => (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      const newCategory = category === id ? '' : id;
-                      const params = {};
-                      if (searchQuery.trim()) params.q = searchQuery.trim();
-                      if (newCategory) params.category = newCategory;
-                      setSearchParams(params);
-                      setShowFilters(false);
-                    }}
-                    className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                      category === id
-                        ? 'bg-blue-100 text-blue-700 border-blue-300'
-                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-                    }`}
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={filterCity}
+                    onChange={(e) => setFilterCity(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="City"
+                  />
+                  <input
+                    type="text"
+                    value={filterState}
+                    onChange={(e) => setFilterState(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="State"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={filterMinRating}
+                    onChange={(e) => setFilterMinRating(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   >
-                    {name}
-                  </button>
-                ))}
+                    <option value="">Min rating</option>
+                    <option value="4.5">4.5+</option>
+                    <option value="4">4+</option>
+                    <option value="3.5">3.5+</option>
+                    <option value="3">3+</option>
+                  </select>
+                  <select
+                    value={filterMinProfile}
+                    onChange={(e) => setFilterMinProfile(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="">Profile completion</option>
+                    <option value="80">80%+</option>
+                    <option value="60">60%+</option>
+                    <option value="40">40%+</option>
+                    <option value="20">20%+</option>
+                  </select>
+                </div>
+                <label className="inline-flex items-center space-x-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={filterVerified}
+                    onChange={(e) => setFilterVerified(e.target.checked)}
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <span>Verified only</span>
+                </label>
+                <div className="flex items-center justify-end gap-2">
+                  <button onClick={clearFilters} className="px-3 py-2 text-sm text-gray-600">Clear</button>
+                  <button onClick={handleSearch} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Apply</button>
+                </div>
               </div>
             </div>
           )}

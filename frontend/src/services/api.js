@@ -50,11 +50,17 @@ export const updateProfile = async (formData) => {
   }
 };
 
-export const searchProviders = async (query = '', category = '') => {
+export const searchProviders = async (query = '', category = '', filters = {}) => {
   try {
     const params = {};
     if (query) params.q = query;
     if (category) params.category = category;
+    if (filters.city) params.city = filters.city;
+    if (filters.state) params.state = filters.state;
+    if (filters.location_state) params.location_state = filters.location_state;
+    if (typeof filters.verified !== 'undefined') params.verified = String(filters.verified);
+    if (filters.minRating) params.minRating = filters.minRating;
+    if (filters.minProfile) params.minProfile = filters.minProfile;
 
     const response = await api.get('/api/search', { params });
     return response.data;
@@ -104,29 +110,20 @@ export const fetchProviderProfile = async (id) => {
 // frontend/src/services/api.js
 
 export const getHiredProviders = async () => {
-  console.log('📤 Fetching hired providers...');
   try {
     const response = await api.get('/api/users/hired-providers');
-    console.log('📥 Full response:', response);
-    
     const result = response.data;
-    console.log('🎯 Parsed result:', result);
-    
     return result;
   } catch (error) {
-    console.error('🚨 getHiredProviders error:', error);
     throw error.response?.data?.message || 'Failed to fetch hired providers';
   }
 };
 
 export const getClients = async () => {
-  console.log('📤 Fetching clients...');
   try {
     const response = await api.get('/api/users/clients');
-    console.log('📥 getClients response:', response);
     return response.data;
   } catch (error) {
-    console.error('🚨 getClients error:', error);
     throw error.response?.data?.message || 'Failed to fetch clients';
   }
 };
@@ -427,7 +424,6 @@ export const markMessagesAsRead = async (otherUserId) => {
   try {
     await api.post('/api/chat/mark-read', { otherUserId });
   } catch (error) {
-    console.error('Failed to mark messages as read:', error);
     // Don't throw — non-critical
   }
 };

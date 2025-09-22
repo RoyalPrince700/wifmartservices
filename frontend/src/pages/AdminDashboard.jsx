@@ -16,6 +16,7 @@ import {
   Legend
 } from 'recharts';
 import { toast } from 'react-hot-toast';
+import { HiSearch } from 'react-icons/hi';
 import Loading from '../components/Loading';
 
 // API Functions
@@ -73,6 +74,7 @@ const AdminDashboard = () => {
   const [servicePage, setServicePage] = useState(1);
   const [verifiedPage, setVerifiedPage] = useState(1);
   const [userFilter, setUserFilter] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
   const limit = 10;
   const [userTotal, setUserTotal] = useState(0);
@@ -138,6 +140,11 @@ const AdminDashboard = () => {
         toast.error('Delete failed');
       }
     }
+  };
+
+  const handleUserSearch = () => {
+    setUserFilter(userSearchTerm);
+    setUserPage(1); // Reset to first page when searching
   };
 
   // Removed portfolio and CAC/badge handlers in the new UI
@@ -289,13 +296,23 @@ const AdminDashboard = () => {
                 <section className="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-gray-900">Manage Users</h2>
-                    <input
-                      type="text"
-                      placeholder="Filter by name or email"
-                      value={userFilter}
-                      onChange={(e) => setUserFilter(e.target.value)}
-                      className="px-3 py-2 border border-blue-200 rounded-md w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Search by name or email"
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleUserSearch()}
+                        className="px-3 py-2 border border-blue-200 rounded-md w-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        onClick={handleUserSearch}
+                        className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        title="Search users"
+                      >
+                        <HiSearch className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full bg-white rounded-md">

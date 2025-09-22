@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { HiSearch, HiArrowRight, HiSparkles, HiExclamation, HiRefresh, HiX } from 'react-icons/hi';
+import { HiSearch, HiArrowRight, HiSparkles, HiExclamation, HiRefresh, HiX, HiUserGroup, HiFilter } from 'react-icons/hi';
 import debounce from "lodash/debounce";
 import SearchResultCard from '../../src/components/SearchResultCard';
 import { searchProviders } from '../../src/services/api';
@@ -16,6 +16,12 @@ const SearchResultsDesktop = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [category, setCategory] = useState(searchParams.get('category') || '');
   const [isLoaded, setIsLoaded] = useState(false);
+  // Filters
+  const [filterCity, setFilterCity] = useState(searchParams.get('city') || '');
+  const [filterState, setFilterState] = useState(searchParams.get('state') || '');
+  const [filterVerified, setFilterVerified] = useState(searchParams.get('verified') === 'true');
+  const [filterMinRating, setFilterMinRating] = useState(searchParams.get('minRating') || '');
+  const [filterMinProfile, setFilterMinProfile] = useState(searchParams.get('minProfile') || '');
   const [cameFromSearch, setCameFromSearch] = useState(false);
 
   // Category name mapping
@@ -52,8 +58,8 @@ const SearchResultsDesktop = () => {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (query, categoryParam) => {
-      if (!query.trim() && !categoryParam) {
+    debounce(async (query, categoryParam, filters) => {
+      if (!query.trim() && !categoryParam && !filtersHasValue(filters)) {
         setProviders([]);
         setLoading(false);
         return;
@@ -61,7 +67,7 @@ const SearchResultsDesktop = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await searchProviders(query, categoryParam);
+        const response = await searchProviders(query, categoryParam, filters);
         setProviders(response);
         setLoading(false);
       } catch (err) {
@@ -73,19 +79,34 @@ const SearchResultsDesktop = () => {
     []
   );
 
+  const filtersHasValue = (f) => {
+    return !!(f.city || f.state || typeof f.verified !== 'undefined' && f.verified !== null && f.verified !== '' || f.minRating || f.minProfile);
+  };
+
   // Update state when URL params change
   useEffect(() => {
     const query = searchParams.get('q') || '';
     const cat = searchParams.get('category') || '';
+    setFilterCity(searchParams.get('city') || '');
+    setFilterState(searchParams.get('state') || '');
+    setFilterVerified(searchParams.get('verified') === 'true');
+    setFilterMinRating(searchParams.get('minRating') || '');
+    setFilterMinProfile(searchParams.get('minProfile') || '');
     setSearchQuery(query);
     setCategory(cat);
   }, [searchParams]);
 
   // Fetch providers when search query or category changes
   useEffect(() => {
-    debouncedSearch(searchQuery, category);
+    debouncedSearch(searchQuery, category, {
+      city: filterCity,
+      state: filterState,
+      verified: filterVerified,
+      minRating: filterMinRating,
+      minProfile: filterMinProfile,
+    });
     return () => debouncedSearch.cancel();
-  }, [searchQuery, category, debouncedSearch]);
+  }, [searchQuery, category, filterCity, filterState, filterVerified, filterMinRating, filterMinProfile, debouncedSearch]);
 
   // Handle search form submission
   const handleSearch = (e) => {
@@ -97,6 +118,23 @@ const SearchResultsDesktop = () => {
     if (category) {
       params.category = category;
     }
+    if (filterCity) params.city = filterCity.trim();
+    if (filterState) params.state = filterState.trim();
+    if (filterVerified) params.verified = 'true'; else if (searchParams.get('verified')) params.verified = '';
+    if (filterMinRating) params.minRating = filterMinRating;
+    if (filterMinProfile) params.minProfile = filterMinProfile;
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setFilterCity('');
+    setFilterState('');
+    setFilterVerified(false);
+    setFilterMinRating('');
+    setFilterMinProfile('');
+    const params = {};
+    if (searchQuery.trim()) params.q = searchQuery.trim();
+    if (category) params.category = category;
     setSearchParams(params);
   };
 
@@ -119,135 +157,77 @@ const SearchResultsDesktop = () => {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
-        {cameFromSearch ? (
-          <div className="text-center mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {category ? getCategoryDisplayName(category) : 'Search Results'}
-              {searchQuery && (
-                <span className="block text-lg font-normal text-gray-600 mt-1">
-                  {category ? `in ${getCategoryDisplayName(category)}` : `for "${searchQuery}"`}
-                </span>
-              )}
-              {!searchQuery && !category && 'Search Results'}
-            </h1>
-            <p className="text-gray-600 text-sm">
-              {providers.length > 0
-                ? `Found ${providers.length} professional${providers.length === 1 ? '' : 's'} ${category ? `in ${getCategoryDisplayName(category)}` : ''}`
-                : `Browse available service providers ${category ? `in ${getCategoryDisplayName(category)}` : ''}`
-              }
-            </p>
-          </div>
-        ) : (
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-200/50 backdrop-blur-sm mb-6">
-              <HiSparkles className="w-4 h-4 text-blue-500 mr-2" />
-              <span className="text-sm font-semibold text-blue-700">Discover Professional Service Providers</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
-              Find Your Perfect
-              <span className="block bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-                Service Provider
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto mb-8 leading-relaxed">
-              Connect with verified professionals across Nigeria. From fashion designers in Lagos to event planners in Abuja.
-            </p>
-          </div>
-        )}
+        {/* Header removed to start page at filter bar */}
 
-        {/* Search Form */}
-        {cameFromSearch ? (
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4">
-              <form onSubmit={handleSearch} className="flex items-center space-x-3">
-                <div className="flex-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <HiSearch className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    name="query"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-3 text-sm border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Modify your search..."
-                    aria-label="Modify search query"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center group"
-                      title="Clear search"
-                      aria-label="Clear search input"
-                    >
-                      <HiX className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" />
-                    </button>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                >
-                  <HiSearch className="w-4 h-4 mr-2" />
-                  Search
-                </button>
-              </form>
+        {/* Search form removed – compact input added to filter bar */}
+
+        {/* Filters */}
+        <div id="filters" className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none transition-opacity duration-150 group-focus-within:opacity-0">
+                <HiSearch className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search..."
+                aria-label="Search providers"
+              />
             </div>
+            <input
+              type="text"
+              value={filterCity}
+              onChange={(e) => setFilterCity(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              placeholder="City (e.g., Lagos)"
+            />
+            <input
+              type="text"
+              value={filterState}
+              onChange={(e) => setFilterState(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              placeholder="State (e.g., Lagos State)"
+            />
+            <select
+              value={filterMinRating}
+              onChange={(e) => setFilterMinRating(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">Min rating</option>
+              <option value="4.5">4.5+</option>
+              <option value="4">4+</option>
+              <option value="3.5">3.5+</option>
+              <option value="3">3+</option>
+            </select>
+            <select
+              value={filterMinProfile}
+              onChange={(e) => setFilterMinProfile(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">Profile completion</option>
+              <option value="80">80%+</option>
+              <option value="60">60%+</option>
+              <option value="40">40%+</option>
+              <option value="20">20%+</option>
+            </select>
+            <label className="inline-flex items-center space-x-2 text-sm">
+              <input
+                type="checkbox"
+                checked={filterVerified}
+                onChange={(e) => setFilterVerified(e.target.checked)}
+                className="h-4 w-4 text-blue-600"
+              />
+              <span>Verified only</span>
+            </label>
           </div>
-        ) : (
-          <div className="max-w-4xl mx-auto mb-12">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 mb-6 transform hover:shadow-2xl transition-all duration-300">
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <HiSearch className="h-6 w-6 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300 group-hover:scale-110 transform transition-transform duration-200" />
-                  </div>
-                  <input
-                    type="text"
-                    name="query"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-16 pr-12 py-5 text-lg border-0 bg-gray-50 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white hover:bg-gray-100 transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-[1.02] focus:scale-[1.02]"
-                    placeholder="Search for services, skills, or names (e.g., 'bag vendor Lagos' or 'wedding planner Abuja')"
-                    aria-label="Search for service providers"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center justify-center w-10 h-full group hover:bg-gray-50/50 rounded-r-2xl transition-colors duration-200"
-                      title="Clear search"
-                      aria-label="Clear search input"
-                    >
-                      <HiX className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" />
-                    </button>
-                  )}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-0 group-focus-within:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-                </div>
-                <div className="flex justify-center pt-2">
-                  <button
-                    type="submit"
-                    className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 hover:-translate-y-2 overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                    <span className="relative mr-3 text-lg">Search Providers</span>
-                    <HiArrowRight className="relative w-5 h-5 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" />
-                    <div className="absolute inset-0 rounded-2xl bg-white/20 scale-0 group-active:scale-100 transition-transform duration-150"></div>
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div className="text-center">
-              <p className="text-gray-500 text-sm font-medium">
-                {providers.length > 0 && !loading && `Found ${providers.length} service provider${providers.length === 1 ? '' : 's'}`}
-                {!loading && !error && providers.length === 0 && searchQuery && 'No results found. Try different keywords.'}
-                {!searchQuery && 'Start by entering your search above.'}
-              </p>
-            </div>
+          <div className="mt-4 flex items-center justify-end gap-3">
+            <button onClick={clearFilters} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800">Clear</button>
+            <button onClick={handleSearch} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Apply</button>
           </div>
-        )}
+        </div>
 
         {/* Results Section */}
         {loading && (

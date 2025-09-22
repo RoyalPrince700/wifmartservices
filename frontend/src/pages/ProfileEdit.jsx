@@ -40,6 +40,7 @@ const ProfileEdit = ({ setActiveTab }) => {
     portfolio_images: [],        // New files to upload
     portfolio_image_urls: [],     // Existing URLs from DB
     portfolio_images_to_delete: [], // Track which existing images to delete
+    cac_certificate_to_delete: false, // Track if existing CAC certificate should be deleted
   });
 
   const [currentPortfolioImage, setCurrentPortfolioImage] = useState(null); // Single image being uploaded
@@ -244,6 +245,14 @@ const ProfileEdit = ({ setActiveTab }) => {
     setFormData({ ...formData, profile_image: null });
   };
 
+  const removeCACCertificate = () => {
+    setFormData({
+      ...formData,
+      cac_certificate: null,
+      cac_certificate_to_delete: true
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -260,6 +269,14 @@ const ProfileEdit = ({ setActiveTab }) => {
       } else if (key === 'portfolio_images_to_delete') {
         // Send portfolio images to delete as separate entries
         formData[key].forEach(url => uploadFormData.append('portfolio_images_to_delete', url));
+      } else if (key === 'cac_number') {
+        // Always send cac_number, even if empty, to allow clearing
+        uploadFormData.append('cac_number', formData[key] || '');
+      } else if (key === 'cac_certificate_to_delete') {
+        // Send flag to delete existing CAC certificate
+        if (formData[key]) {
+          uploadFormData.append('cac_certificate_to_delete', 'true');
+        }
       } else if (Array.isArray(formData[key])) {
         formData[key].forEach(item => uploadFormData.append(key, item));
       } else if (formData[key]) {
@@ -776,13 +793,66 @@ const ProfileEdit = ({ setActiveTab }) => {
               </span>
             </label>
             {user?.verification_status === 'Approved' || user?.isVerifiedBadge ? (
-              <input
-                type="file"
-                name="cac_certificate"
-                accept="image/*,application/pdf"
-                onChange={handleFileChange}
-                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
+              <div className="mt-1 space-y-3">
+                {/* Show existing CAC certificate if available */}
+                {user?.cac_certificate && !formData.cac_certificate_to_delete && (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center">
+                      <svg className="h-5 w-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">CAC Certificate Uploaded</p>
+                        <p className="text-xs text-green-600">
+                          {user.cac_certificate.includes('.pdf') ? 'PDF Document' : 'Image File'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCACCertificate}
+                      className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {/* File input - only show if no existing certificate or if user wants to replace */}
+                {(!user?.cac_certificate || formData.cac_certificate_to_delete) && (
+                  <input
+                    type="file"
+                    name="cac_certificate"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                )}
+
+                {/* Show selected file for upload */}
+                {formData.cac_certificate && (
+                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center">
+                      <svg className="h-5 w-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-blue-800">Selected for upload: {formData.cac_certificate.name}</p>
+                        <p className="text-xs text-blue-600">
+                          {formData.cac_certificate.type.includes('pdf') ? 'PDF Document' : 'Image File'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCACCertificate}
+                      className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="mt-1 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <div className="flex items-start">

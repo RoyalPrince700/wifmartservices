@@ -17,7 +17,7 @@ const BrowseCategoriesMobile = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [sortBy, setSortBy] = useState('rating');
+  const [sortBy, setSortBy] = useState('completion');
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('categories'); // 'categories' or 'all'
 
@@ -121,6 +121,17 @@ const BrowseCategoriesMobile = () => {
   // Sort providers
   const sortedProviders = [...filteredProviders].sort((a, b) => {
     switch (sortBy) {
+      case 'completion': {
+        const aC = typeof a.profile_completion === 'number' ? a.profile_completion : 0;
+        const bC = typeof b.profile_completion === 'number' ? b.profile_completion : 0;
+        const aV = (a?.isVerifiedBadge === true) || ((a?.verification_status || '').toLowerCase() === 'approved');
+        const bV = (b?.isVerifiedBadge === true) || ((b?.verification_status || '').toLowerCase() === 'approved');
+        if (bV !== aV) return bV ? 1 : -1; // Verified first
+        if (bC !== aC) return bC - aC;
+        const br = (b.rating || 0) - (a.rating || 0);
+        if (br !== 0) return br;
+        return a.name?.localeCompare(b.name) || 0;
+      }
       case 'rating':
         return (b.rating || 0) - (a.rating || 0);
       case 'name':
@@ -232,6 +243,7 @@ const BrowseCategoriesMobile = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
+                  <option value="completion">Sort by Completion</option>
                   <option value="rating">Sort by Rating</option>
                   <option value="name">Sort by Name</option>
                   <option value="location">Sort by Location</option>
@@ -372,7 +384,7 @@ const BrowseCategoriesMobile = () => {
                     <Link
                       key={_id}
                       to={`/profile/${_id}`}
-                      className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200"
+                      className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 h-full"
                     >
                       <div className="flex items-center space-x-3 mb-3">
                         <AvatarImage
@@ -397,7 +409,25 @@ const BrowseCategoriesMobile = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      {/* Extra info: skills and short pitch */}
+                      <div className="mt-2">
+                        {Array.isArray(skills) && skills.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {skills.slice(0, 3).map((skill, idx) => (
+                              <span key={idx} className="inline-block px-2 py-0.5 text-xs rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {provider.experience_pitch && (
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {provider.experience_pitch}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between">
                         <div className="flex items-center space-x-1">
                           <HiStar className="w-4 h-4 text-yellow-400" />
                           <span className="text-sm text-gray-600">

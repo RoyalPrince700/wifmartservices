@@ -199,10 +199,10 @@ const FeaturedProviders = () => {
               <Link
                 key={_id}
                 to={`/profile/${_id}`}
-                className="block"
+                className="block h-full"
                 ref={index === visibleProviders.length - 1 ? lastProviderRef : null}
               >
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
+                <div className="h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:scale-[1.01]">
                   {/* Header: Image & Name */}
                   <div className="flex p-5 pb-4 gap-4">
                     <div className="flex-shrink-0">
@@ -275,7 +275,7 @@ const FeaturedProviders = () => {
                   </div>
 
                   {/* CTA Button */}
-                  <div className="px-5 pt-2 pb-5">
+                  <div className="px-5 pt-2 pb-5 mt-auto">
                     <button className="w-full text-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                       View Full Profile →
                     </button>

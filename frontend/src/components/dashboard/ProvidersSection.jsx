@@ -19,13 +19,6 @@ const ProvidersSection = ({ hiredProviders, loading, setSelectedProviderRequest 
       ) : hiredProviders.length > 0 ? (
         <ul className="divide-y divide-gray-200">
           {hiredProviders.map((provider, index) => {
-            // Debug log to inspect verification fields
-            console.log('👑 Provider Verified:', provider.name, {
-              isVerifiedBadge: provider?.isVerifiedBadge,
-              isVerified: provider?.isVerified,
-              verification_status: provider?.verification_status,
-            });
-
             // Verification logic
             const verified =
               provider?.isVerifiedBadge === true ||

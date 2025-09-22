@@ -92,6 +92,7 @@ export const setupProfile = async (req, res, next) => {
       physical_address,
       cac_number,
       portfolio_images_to_delete,
+      cac_certificate_to_delete,
     } = req.body;
 
     const updateData = {};
@@ -132,8 +133,8 @@ export const setupProfile = async (req, res, next) => {
     if (location_state) updateData.location_state = location_state;
     if (physical_address) updateData.physical_address = physical_address;
 
-    // ✅ CAC
-    if (cac_number) updateData.cac_number = cac_number;
+    // ✅ CAC - Allow clearing by sending empty string
+    if (cac_number !== undefined) updateData.cac_number = cac_number;
 
     // ✅ Handle portfolio image deletions
     if (portfolio_images_to_delete) {
@@ -164,6 +165,24 @@ export const setupProfile = async (req, res, next) => {
             image => !imagesToDelete.includes(image.url)
           );
         }
+      }
+    }
+
+    // ✅ Handle CAC certificate deletion
+    if (cac_certificate_to_delete === 'true' && req.user.cac_certificate) {
+      try {
+        // Extract public_id from Cloudinary URL
+        const urlParts = req.user.cac_certificate.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        const publicId = `wifmart/cac/${filename.split('.')[0]}`;
+
+        await cloudinary.uploader.destroy(publicId);
+
+        // Clear the CAC certificate field
+        updateData.cac_certificate = '';
+        updateData.cac_status = 'Not Submitted';
+      } catch (error) {
+        console.error('Error deleting CAC certificate from Cloudinary:', error);
       }
     }
 

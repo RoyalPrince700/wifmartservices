@@ -81,9 +81,8 @@ const Categories = () => {
     fetchCategoryCounts();
   }, []);
 
-  // Format count display
+  // Format count display (text only)
   const formatCount = (count) => {
-    if (loading) return <Loading variant="spinner" size="xs" color="blue" className="inline" />;
     return `${count || 0} provider${count === 1 ? '' : 's'}`;
   };
 
@@ -146,12 +145,19 @@ const Categories = () => {
                     }`}>
                       {category.name}
                     </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {category.status === 'available'
-                        ? formatCount(categoryCounts[category.id])
-                        : 'Coming Soon'
-                      }
-                    </p>
+                    {category.status === 'available' ? (
+                      loading ? (
+                        <div className="mt-1 text-sm text-gray-500">
+                          <Loading variant="spinner" size="xs" color="blue" />
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-sm text-gray-500">
+                          {formatCount(categoryCounts[category.id])}
+                        </p>
+                      )
+                    ) : (
+                      <p className="mt-1 text-sm text-gray-500">Coming Soon</p>
+                    )}
                     <div className="mt-2 sm:mt-3">
                       <span className={`text-sm font-medium ${
                         category.status === 'available'

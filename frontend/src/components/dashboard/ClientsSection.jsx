@@ -17,14 +17,6 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
       ) : hireRequests.length > 0 ? (
         <div className="space-y-3">
           {hireRequests.map((req) => {
-            // Debug log to inspect verification fields
-            console.log('👑 Client Verified:', req.client_id?.name || 'Unknown', {
-              client_id: req.client_id,
-              isVerifiedBadge: req.client_id?.isVerifiedBadge,
-              isVerified: req.client_id?.isVerified,
-              verification_status: req.client_id?.verification_status,
-            });
-
             // Verification logic
             const verified =
               req.client_id?.isVerifiedBadge === true ||
@@ -96,7 +88,6 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                               const newStatus = e.target.value;
                               const id = req.id;
                               if (!id) {
-                                console.error('❌ No ID found for request:', req);
                                 toast.error('Cannot update: missing ID');
                                 return;
                               }
@@ -188,7 +179,6 @@ const ClientsSection = ({ hireRequests, loading, setSelectedClient, handleUpdate
                           const newStatus = e.target.value;
                           const id = req.id;
                           if (!id) {
-                            console.error('❌ No ID found for request:', req);
                             toast.error('Cannot update: missing ID');
                             return;
                           }
